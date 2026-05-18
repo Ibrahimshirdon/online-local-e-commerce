@@ -14,11 +14,19 @@ if (!admin.apps.length) {
         // Local: use file
         credential = admin.credential.cert(require(serviceAccountPath));
     } else {
+        let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+        if (privateKey) {
+            // Remove beginning and ending quotes if the user copied them from the JSON file
+            privateKey = privateKey.replace(/^"|"$/g, '');
+            // Convert literal '\n' text to actual linebreaks
+            privateKey = privateKey.replace(/\\n/g, '\n');
+        }
+
         // Production (Vercel): use env variables
         credential = admin.credential.cert({
             projectId: process.env.FIREBASE_PROJECT_ID,
             clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            privateKey: process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : undefined
+            privateKey: privateKey
         });
     }
 
