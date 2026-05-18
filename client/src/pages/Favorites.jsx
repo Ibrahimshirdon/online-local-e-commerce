@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import api from '../api/axios';
+import axios from 'axios';
 import AuthContext from '../context/AuthContext';
 import ProductCard from '../components/ProductCard';
 
@@ -12,7 +12,10 @@ const Favorites = () => {
         const fetchFavorites = async () => {
             if (user) {
                 try {
-                    const { data } = await api.get('/favorites');
+                    const config = {
+                        headers: { Authorization: `Bearer ${user.token}` }
+                    };
+                    const { data } = await axios.get('/api/favorites', config);
                     setFavorites(data);
                 } catch (error) {
                     console.error(error);
@@ -45,7 +48,7 @@ const Favorites = () => {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {favorites.map(product => (
-                        <ProductCard key={product._id || product.id} product={product} />
+                        <ProductCard key={product.id} product={product} />
                     ))}
                 </div>
             )}

@@ -15,10 +15,6 @@ const protect = async (req, res, next) => {
 
             req.user = await User.findById(decoded.id);
 
-            if (!req.user) {
-                return res.status(401).json({ message: 'Not authorized, user not found' });
-            }
-
             next();
         } catch (error) {
             console.error(error);
@@ -40,7 +36,7 @@ const admin = (req, res, next) => {
 };
 
 const seller = (req, res, next) => {
-    if (req.user && (req.user.role === 'seller' || req.user.role === 'admin')) {
+    if (req.user && (req.user.role === 'shop_owner' || req.user.role === 'admin')) {
         next();
     } else {
         res.status(401).json({ message: 'Not authorized as a seller' });

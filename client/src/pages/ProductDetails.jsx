@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import api, { imageBaseUrl } from '../api/axios';
+import axios from 'axios';
 import { FaWhatsapp, FaMapMarkerAlt, FaStore, FaHeart } from 'react-icons/fa';
 import { useContext } from 'react';
 import AuthContext from '../context/AuthContext';
@@ -19,12 +19,10 @@ const ProductDetails = () => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
-
-
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const { data } = await api.get(`/products/${id}`);
+                const { data } = await axios.get(`/api/products/${id}`);
                 setProduct(data);
                 setLoading(false);
             } catch (error) {
@@ -36,7 +34,10 @@ const ProductDetails = () => {
         const checkFavorite = async () => {
             if (user) {
                 try {
-                    const { data } = await api.get(`/favorites/check/${id}`);
+                    const config = {
+                        headers: { Authorization: `Bearer ${user.token}` }
+                    };
+                    const { data } = await axios.get(`/api/favorites/check/${id}`, config);
                     setIsLiked(data.isFavorite);
                 } catch (error) {
                     console.error(error);
@@ -79,7 +80,7 @@ const ProductDetails = () => {
                                 src={
                                     allImages[currentImageIndex]?.image_url.startsWith('http')
                                         ? allImages[currentImageIndex].image_url
-                                        : `${imageBaseUrl}${allImages[currentImageIndex]?.image_url}`
+                                        : `${allImages[currentImageIndex]?.image_url}`
                                 }
                                 alt={product.name}
                                 className="w-full h-96 object-contain hover:scale-105 transition-transform duration-300"
@@ -126,7 +127,7 @@ const ProductDetails = () => {
                                             }`}
                                     >
                                         <img
-                                            src={img.image_url.startsWith('http') ? img.image_url : `${imageBaseUrl}${img.image_url}`}
+                                            src={img.image_url.startsWith('http') ? img.image_url : `${img.image_url}`}
                                             alt={`Thumbnail ${index + 1}`}
                                             className="w-full h-full object-cover"
                                         />
@@ -155,7 +156,10 @@ const ProductDetails = () => {
                                         return;
                                     }
                                     try {
-                                        const { data } = await api.post('/favorites/toggle', { productId: product._id || product.id });
+                                        const config = {
+                                            headers: { Authorization: `Bearer ${user.token}` }
+                                        };
+                                        const { data } = await axios.post('/api/favorites/toggle', { productId: product.id }, config);
                                         setIsLiked(data.isFavorite);
                                     } catch (error) {
                                         console.error(error);
@@ -215,12 +219,12 @@ const ProductDetails = () => {
                                         <FaStore className="mr-2 text-gray-500" />
                                         {product.shop_id.logo_url && (
                                             <img
-                                                src={product.shop_id.logo_url.startsWith('http') ? product.shop_id.logo_url : `${imageBaseUrl}${product.shop_id.logo_url}`}
+                                                src={product.shop_id.logo_url.startsWith('http') ? product.shop_id.logo_url : `${product.shop_id.logo_url}`}
                                                 alt={product.shop_id.name}
                                                 className="w-8 h-8 rounded-full object-cover mr-2 border border-gray-200"
                                             />
                                         )}
-                                        <Link to={`/shop/${product.shop_id?._id || product.shop_id?.id}`} className="text-blue-500 hover:underline font-medium">
+                                        <Link to={`/shop/${product.shop_id._id || product.shop_id.id}`} className="text-blue-500 hover:underline font-medium">
                                             {product.shop_id.name}
                                         </Link>
                                     </div>

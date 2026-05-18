@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
-import api, { imageBaseUrl } from '../api/axios';
+import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import AuthContext from '../context/AuthContext';
 import { FaFlag } from 'react-icons/fa';
@@ -19,11 +19,14 @@ const ShopProfile = () => {
     const handleReportSubmit = async (e) => {
         e.preventDefault();
         try {
-            await api.post('/reports', {
-                shopId: shop._id || shop.id,
+            const config = {
+                headers: { Authorization: `Bearer ${user.token}` }
+            };
+            await axios.post('/api/reports', {
+                shopId: shop.id,
                 reason: reportReason,
                 description: reportDescription
-            });
+            }, config);
 
             setShowReportModal(false);
             setReportReason('');
@@ -39,17 +42,17 @@ const ShopProfile = () => {
         const fetchShopData = async () => {
             try {
                 // Fetch specific shop by ID
-                const { data: shopData } = await api.get(`/shops/${id}`);
+                const { data: shopData } = await axios.get(`/api/shops/${id}`);
                 setShop(shopData);
 
                 // Fetch all products and filter
-                const { data: prodData } = await api.get('/products');
+                const { data: prodData } = await axios.get('/api/products');
 
                 // Filter products belonging to this shop. 
                 // Handle both straight ID checks and populated object checks if backend changes.
                 // Assuming backend getProducts populates shop_id usually.
                 const shopProducts = prodData.filter(p => {
-                    const pShopId = typeof p.shop_id === 'object' ? (p.shop_id._id || p.shop_id.id) : p.shop_id;
+                    const pShopId = typeof p.shop_id === 'object' ? (p.shop_id.id || p.shop_id._id) : p.shop_id;
                     return String(pShopId) === String(id);
                 });
 
@@ -80,7 +83,7 @@ const ShopProfile = () => {
                     <div className="flex flex-col md:flex-row items-center gap-6">
                         <div className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-gray-100 flex-shrink-0">
                             <img
-                                src={shop.logo_url ? (shop.logo_url.startsWith('http') ? shop.logo_url : `${imageBaseUrl}${shop.logo_url}`) : 'https://via.placeholder.com/150?text=Shop+Logo'}
+                                src={shop.logo_url ? (shop.logo_url.startsWith('http') ? shop.logo_url : `${shop.logo_url}`) : 'https://via.placeholder.com/150?text=Shop+Logo'}
                                 alt={shop.name}
                                 className="w-full h-full object-cover"
                             />
@@ -104,7 +107,7 @@ const ShopProfile = () => {
                         </div>
                     </div>
                     <div className="flex flex-col items-center md:items-end gap-2">
-                        {user && (user._id || user.id) !== (shop.owner_id._id || shop.owner_id.id || shop.owner_id) && (
+                        {user && user.id !== shop.owner_id && (
                             <button
                                 onClick={() => setShowReportModal(true)}
                                 className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium border border-red-200"
@@ -219,16 +222,16 @@ const ShopProfile = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {products.map((product) => (
-                        <div key={product._id || product.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow group">
+                        <div key={product.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow group">
                             <div className="relative h-48 overflow-hidden">
                                 <img
                                     src={
                                         product.images && product.images.length > 0
-                                            ? (product.images[0].image_url.startsWith('http') ? product.images[0].image_url : `${imageBaseUrl}${product.images[0].image_url}`)
+                                            ? (product.images[0].image_url.startsWith('http') ? product.images[0].image_url : `${product.images[0].image_url}`)
                                             : product.first_image
-                                                ? (product.first_image.startsWith('http') ? product.first_image : `${imageBaseUrl}${product.first_image}`)
+                                                ? (product.first_image.startsWith('http') ? product.first_image : `${product.first_image}`)
                                                 : product.image_url
-                                                    ? (product.image_url.startsWith('http') ? product.image_url : `${imageBaseUrl}${product.image_url}`)
+                                                    ? (product.image_url.startsWith('http') ? product.image_url : `${product.image_url}`)
                                                     : 'https://via.placeholder.com/300'
                                     }
                                     alt={product.name}
@@ -259,7 +262,7 @@ const ShopProfile = () => {
                                             <span className="text-xl font-bold text-primary-600">${product.price}</span>
                                         )}
                                     </div>
-                                    <a href={`/product/${product._id || product.id}`} className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors">
+                                    <a href={`/product/${product.id}`} className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors">
                                         View
                                     </a>
                                 </div>

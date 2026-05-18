@@ -2,7 +2,7 @@ import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CartContext from '../context/CartContext';
 import AuthContext from '../context/AuthContext';
-import api, { imageBaseUrl } from '../api/axios';
+import axios from 'axios';
 import { FaLock, FaCreditCard, FaMoneyBillWave } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 
@@ -10,7 +10,6 @@ const Checkout = () => {
     const { cartItems, getCartTotal, clearCart } = useContext(CartContext);
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
-
 
     const [paymentMethod, setPaymentMethod] = useState('online');
     const [loading, setLoading] = useState(false);
@@ -26,7 +25,7 @@ const Checkout = () => {
 
     if (cartItems.length === 0 && !orderSuccess) {
         navigate('/cart');
-        return null;
+        return null; // Or render loading/redirect UI
     }
 
     const handleChange = (e) => {
@@ -38,30 +37,30 @@ const Checkout = () => {
         setLoading(true);
 
         try {
-            const orderData = {
-                orderItems: cartItems.map(item => ({
-                    product_id: item.product_id,
-                    qty: item.qty,
-                    price: item.product.discount_price > 0 ? item.product.discount_price : item.product.price
-                })),
-                paymentMethod,
-                totalPrice: getCartTotal(),
-                shippingAddress: formData
+            const config = {
+                headers: { Authorization: `Bearer ${user.token}` }
             };
 
-            await api.post('/orders', orderData);
+            const orderData = {
+                orderItems: cartItems,
+                paymentMethod,
+                totalPrice: getCartTotal(),
+                shippingAddress: formData // In real app, save address
+            };
 
-            // Simulation of payment delay for UX
+            await axios.post('/api/orders', orderData, config);
+
+            // Simulation of payment delay
             setTimeout(() => {
                 clearCart();
                 setLoading(false);
                 setOrderSuccess(true);
-            }, 1000);
+            }, 2000);
 
         } catch (error) {
             console.error(error);
             setLoading(false);
-            toast.error(error.response?.data?.message || 'Error placing order. Please try again.');
+            toast.error('Error placing order. Please try again.');
         }
     };
 
@@ -238,7 +237,7 @@ const Checkout = () => {
                                     <div className="flex items-center gap-2">
                                         <div className="w-10 h-10 rounded bg-gray-50 overflow-hidden text-xs">
                                             <img
-                                                src={item.product.images && item.product.images.length > 0 ? (item.product.images[0].image_url.startsWith('http') ? item.product.images[0].image_url : `${imageBaseUrl}${item.product.images[0].image_url}`) : 'https://via.placeholder.com/150'}
+                                                src={item.product.images && item.product.images.length > 0 ? (item.product.images[0].image_url.startsWith('http') ? item.product.images[0].image_url : `${item.product.images[0].image_url}`) : 'https://via.placeholder.com/150'}
                                                 alt={item.product.name}
                                                 className="w-full h-full object-cover"
                                             />

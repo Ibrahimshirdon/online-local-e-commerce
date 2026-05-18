@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api, { imageBaseUrl } from '../api/axios';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import SearchBar from '../components/SearchBar';
 import ProductCard from '../components/ProductCard';
@@ -21,8 +21,6 @@ const Home = () => {
         sort: ''
     });
 
-
-
     useEffect(() => {
         fetchData();
     }, []);
@@ -35,8 +33,8 @@ const Home = () => {
         try {
             setLoading(true);
             const [productsRes, shopsRes] = await Promise.all([
-                api.get('/products'),
-                api.get('/shops')
+                axios.get('/api/products'),
+                axios.get('/api/shops')
             ]);
 
             setProducts(productsRes.data);
@@ -83,7 +81,7 @@ const Home = () => {
         } else if (filters.sort === 'price_desc') {
             filtered.sort((a, b) => b.price - a.price);
         } else if (filters.sort === 'newest') {
-            filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         }
 
         setFilteredProducts(filtered);
@@ -178,9 +176,9 @@ const Home = () => {
                                 {products.slice(0, 4).map((p, idx) => {
                                     const imgUrl = p.images?.[0]?.image_url || p.image_url;
                                     return (
-                                        <div key={p._id || p.id} className={`bg-white p-4 rounded-2xl shadow-xl transform transition-all duration-500 hover:scale-105 ${idx % 2 === 0 ? 'translate-y-4 hover:translate-y-2' : '-translate-y-4 hover:-translate-y-2'}`}>
+                                        <div key={p.id} className={`bg-white p-4 rounded-2xl shadow-xl transform transition-all duration-500 hover:scale-105 ${idx % 2 === 0 ? 'translate-y-4 hover:translate-y-2' : '-translate-y-4 hover:-translate-y-2'}`}>
                                             {imgUrl ?
-                                                <img src={imgUrl.startsWith('http') ? imgUrl : `${imageBaseUrl}${imgUrl}`} className="w-full h-36 object-cover rounded-xl mb-3 shadow-md" alt={p.name} />
+                                                <img src={imgUrl.startsWith('http') ? imgUrl : `${imgUrl}`} className="w-full h-36 object-cover rounded-xl mb-3 shadow-md" alt={p.name} />
                                                 : <div className="w-full h-36 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl mb-3"></div>
                                             }
                                             <div className="h-3 w-24 bg-gray-200 rounded-full mb-2"></div>
@@ -242,10 +240,10 @@ const Home = () => {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                         {featuredShops.map(shop => (
-                            <Link to={`/shop/${shop.id || shop._id}`} key={shop.id || shop._id} className="group block bg-gradient-to-br from-gray-50 to-white hover:from-primary-50 hover:to-secondary-50 border-2 border-gray-100 hover:border-primary-300 rounded-3xl p-6 transition-all duration-500 hover:shadow-xl text-center transform hover:-translate-y-2">
+                            <a href={`/shop/${shop.id}`} key={shop.id} className="group block bg-gradient-to-br from-gray-50 to-white hover:from-primary-50 hover:to-secondary-50 border-2 border-gray-100 hover:border-primary-300 rounded-3xl p-6 transition-all duration-500 hover:shadow-xl text-center transform hover:-translate-y-2">
                                 <div className="w-24 h-24 mx-auto mb-4 relative">
                                     <img
-                                        src={shop.logo_url ? (shop.logo_url.startsWith('http') ? shop.logo_url : `${imageBaseUrl}${shop.logo_url}`) : 'https://via.placeholder.com/150'}
+                                        src={shop.logo_url ? (shop.logo_url.startsWith('http') ? shop.logo_url : `${shop.logo_url}`) : 'https://via.placeholder.com/150'}
                                         className="w-full h-full rounded-full object-cover border-4 border-white shadow-xl group-hover:scale-110 group-hover:shadow-2xl transition-all duration-500"
                                         onError={(e) => e.target.src = 'https://via.placeholder.com/150'}
                                     />
@@ -259,11 +257,15 @@ const Home = () => {
                                 <span className="inline-block bg-gradient-to-r from-primary-600 to-secondary-600 text-white text-sm font-bold px-4 py-2 rounded-full shadow-md group-hover:shadow-glow transition-all">
                                     Visit Shop
                                 </span>
-                            </Link>
+                            </a>
                         ))}
                     </div>
                 </section>
             )}
+
+
+
+
 
             {/* MAIN PRODUCTS GRID */}
             <section id="products-section" className="scroll-mt-24 animate-slide-up">
@@ -283,7 +285,7 @@ const Home = () => {
                 {filteredProducts.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {filteredProducts.map((product, index) => (
-                            <div key={product.id || product._id} className="transform hover:-translate-y-1 transition-transform duration-300">
+                            <div key={product.id} className="transform hover:-translate-y-1 transition-transform duration-300">
                                 <ProductCard product={product} />
                             </div>
                         ))}

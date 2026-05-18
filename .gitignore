@@ -1,31 +1,7 @@
-# Node modules
 node_modules/
-client/node_modules/
-server/node_modules/
-
-# Environment variables
 .env
-client/.env
-server/.env
-
-# IDEs
-.vscode/
-.idea/
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Build files
+firebase-adminsdk.json
+server_error.log
 client/dist/
-client/build/
-
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Other
-server/uploads/*
-!server/uploads/.gitkeep
+server/uploads/
+.DS_Store

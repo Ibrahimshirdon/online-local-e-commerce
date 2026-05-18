@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaMapMarkerAlt, FaTag, FaShoppingCart, FaHeart, FaEye } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import { useState, useEffect, useContext } from 'react';
-import api, { imageBaseUrl } from '../api/axios';
+import axios from 'axios';
 import AuthContext from '../context/AuthContext';
 import CartContext from '../context/CartContext';
 import ConfirmDialog from './ConfirmDialog';
@@ -16,14 +16,16 @@ const ProductCard = ({ product }) => {
 
     const [isLiked, setIsLiked] = useState(false);
     const [showLoginPrompt, setShowLoginPrompt] = useState(false);
-
     const whatsappLink = `https://wa.me/${product.shop_phone}?text=Asc, I want this product: ${product.name}`;
 
     useEffect(() => {
         const checkFavorite = async () => {
             if (user) {
                 try {
-                    const { data } = await api.get(`/favorites/check/${product._id || product.id}`);
+                    const config = {
+                        headers: { Authorization: `Bearer ${user.token}` }
+                    };
+                    const { data } = await axios.get(`/api/favorites/check/${product.id}`, config);
                     setIsLiked(data.isFavorite);
                 } catch (error) {
                     console.error(error);
@@ -31,7 +33,7 @@ const ProductCard = ({ product }) => {
             }
         };
         checkFavorite();
-    }, [user, product.id, product._id]);
+    }, [user, product.id]);
 
     return (
         <>
@@ -41,9 +43,9 @@ const ProductCard = ({ product }) => {
                     <img
                         src={
                             product.images && product.images.length > 0
-                                ? (product.images[0].image_url.startsWith('http') ? product.images[0].image_url : `${imageBaseUrl}${product.images[0].image_url}`)
+                                ? (product.images[0].image_url.startsWith('http') ? product.images[0].image_url : `${product.images[0].image_url}`)
                                 : product.image_url
-                                    ? (product.image_url.startsWith('http') ? product.image_url : `${imageBaseUrl}${product.image_url}`)
+                                    ? (product.image_url.startsWith('http') ? product.image_url : `${product.image_url}`)
                                     : 'https://via.placeholder.com/400x300?text=No+Image'
                         }
                         alt={product.name}
@@ -83,7 +85,10 @@ const ProductCard = ({ product }) => {
                                     return;
                                 }
                                 try {
-                                    const { data } = await api.post('/favorites/toggle', { productId: product.id || product._id });
+                                    const config = {
+                                        headers: { Authorization: `Bearer ${user.token}` }
+                                    };
+                                    const { data } = await axios.post('/api/favorites/toggle', { productId: product.id }, config);
                                     setIsLiked(data.isFavorite);
                                 } catch (error) {
                                     console.error(error);
@@ -159,7 +164,7 @@ const ProductCard = ({ product }) => {
 
                         <div className="flex gap-2">
                             <Link
-                                to={`/product/${product._id || product.id}`}
+                                to={`/product/${product.id}`}
                                 className="flex-1 px-4 py-3 bg-gray-50 text-gray-700 rounded-xl hover:bg-gray-100 transition-all font-semibold text-center hover:scale-105 hover:shadow-md"
                             >
                                 Details

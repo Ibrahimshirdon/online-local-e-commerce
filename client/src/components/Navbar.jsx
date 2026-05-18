@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUser, FaStore, FaShoppingBag, FaSignOutAlt, FaCog, FaHeart, FaBell, FaHome, FaInfoCircle, FaQuestionCircle } from 'react-icons/fa';
 import { useContext, useState, useEffect } from 'react';
-import api, { imageBaseUrl } from '../api/axios';
+import axios from 'axios';
 import AuthContext from '../context/AuthContext';
 import CartContext from '../context/CartContext';
 
@@ -13,7 +13,6 @@ const Navbar = () => {
     const [scrolled, setScrolled] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const [notifications, setNotifications] = useState([]);
-
 
     const navigate = useNavigate();
 
@@ -33,7 +32,8 @@ const Navbar = () => {
 
     const fetchUnreadCount = async () => {
         try {
-            const { data } = await api.get('/notifications/unread');
+            const config = { headers: { Authorization: `Bearer ${user.token}` } };
+            const { data } = await axios.get('/api/notifications/unread', config);
             setUnreadCount(data.count);
         } catch (error) {
             console.error('Error fetching unread count', error);
@@ -42,7 +42,8 @@ const Navbar = () => {
 
     const fetchNotifications = async () => {
         try {
-            const { data } = await api.get('/notifications');
+            const config = { headers: { Authorization: `Bearer ${user.token}` } };
+            const { data } = await axios.get('/api/notifications', config);
             setNotifications(data);
         } catch (error) {
             console.error('Error fetching notifications', error);
@@ -59,8 +60,9 @@ const Navbar = () => {
 
     const markAsRead = async (id) => {
         try {
-            await api.put(`/notifications/${id}/read`);
-            setNotifications(notifications.map(n => (n._id === id || n.id === id) ? { ...n, is_read: true } : n));
+            const config = { headers: { Authorization: `Bearer ${user.token}` } };
+            await axios.put(`/api/notifications/${id}/read`, {}, config);
+            setNotifications(notifications.map(n => n.id === id ? { ...n, is_read: 1 } : n));
             setUnreadCount(prev => Math.max(0, prev - 1));
         } catch (error) {
             console.error('Error marking as read', error);
@@ -212,12 +214,12 @@ const Navbar = () => {
                                                 <div className="divide-y divide-gray-100">
                                                     {notifications.map(notification => (
                                                         <div
-                                                            key={notification._id || notification.id}
+                                                            key={notification.id}
                                                             className={`p-4 hover:bg-gray-50 transition-all cursor-pointer ${!notification.is_read ? 'bg-blue-50 border-l-4 border-primary-500' : ''}`}
-                                                            onClick={() => !notification.is_read && markAsRead(notification._id || notification.id)}
+                                                            onClick={() => !notification.is_read && markAsRead(notification.id)}
                                                         >
                                                             <p className="text-sm text-gray-800 mb-1 font-medium">{notification.message}</p>
-                                                            <p className="text-xs text-gray-500">{new Date(notification.createdAt).toLocaleString()}</p>
+                                                            <p className="text-xs text-gray-500">{new Date(notification.created_at).toLocaleString()}</p>
                                                         </div>
                                                     ))}
                                                 </div>
@@ -238,7 +240,7 @@ const Navbar = () => {
                                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-secondary-500 flex items-center justify-center text-white font-bold overflow-hidden border border-white/20">
                                             {user.profile_image ? (
                                                 <img
-                                                    src={`${imageBaseUrl}${user.profile_image}`}
+                                                    src={`${user.profile_image}`}
                                                     alt={user.name}
                                                     className="w-full h-full object-cover"
                                                 />
@@ -255,7 +257,7 @@ const Navbar = () => {
                                                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-secondary-500 flex items-center justify-center text-white font-bold overflow-hidden shadow-md ring-2 ring-white">
                                                     {user.profile_image ? (
                                                         <img
-                                                            src={`${imageBaseUrl}${user.profile_image}`}
+                                                            src={`${user.profile_image}`}
                                                             alt={user.name}
                                                             className="w-full h-full object-cover"
                                                         />

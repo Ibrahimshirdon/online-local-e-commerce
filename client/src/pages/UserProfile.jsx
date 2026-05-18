@@ -1,15 +1,14 @@
 import { useState, useContext, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import api from '../api/axios';
+import axios from 'axios';
 import AuthContext from '../context/AuthContext';
 import { FaUser, FaEnvelope, FaPhone, FaCamera, FaSpinner, FaLock } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 
 const UserProfile = () => {
-    const { user } = useContext(AuthContext);
+    const { user, login } = useContext(AuthContext); // Re-using login to update context user? Ideally need update function
     const [searchParams, setSearchParams] = useSearchParams();
     const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'profile');
-    const imageBaseUrl = import.meta.env.VITE_IMAGE_BASE_URL || 'http://localhost:5000';
 
     // Profile State
     const [name, setName] = useState('');
@@ -35,10 +34,10 @@ const UserProfile = () => {
             setName(user.name);
             setPhone(user.phone || '');
             if (user.profile_image) {
-                setPreview(user.profile_image.startsWith('http') ? user.profile_image : `${imageBaseUrl}${user.profile_image}`);
+                setPreview(`${user.profile_image}`);
             }
         }
-    }, [user, imageBaseUrl]);
+    }, [user]);
 
     useEffect(() => {
         const tab = searchParams.get('tab');
@@ -54,11 +53,13 @@ const UserProfile = () => {
     const fetchOrders = async () => {
         setLoadingOrders(true);
         try {
-            const { data } = await api.get('/orders/myorders');
+            const config = {
+                headers: { Authorization: `Bearer ${user.token}` }
+            };
+            const { data } = await axios.get('/api/orders/myorders', config);
             setOrders(data);
         } catch (err) {
             console.error("Error fetching orders:", err);
-            toast.error('Failed to load orders');
         } finally {
             setLoadingOrders(false);
         }
@@ -91,9 +92,14 @@ const UserProfile = () => {
         }
 
         try {
-            const { data } = await api.put('/users/profile', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${user.token}`
+                }
+            };
+
+            const { data } = await axios.put('/api/users/profile', formData, config);
 
             // Update local storage
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -102,15 +108,13 @@ const UserProfile = () => {
             userInfo.profile_image = data.profile_image;
             localStorage.setItem('userInfo', JSON.stringify(userInfo));
 
-            toast.success('Profile updated successfully!');
-            setMessage('Profile updated successfully!');
+            // Force reload to update context (or better: add update function to context)
+            window.location.reload();
 
-            // Give a moment for toast then reload to update whole app state
-            setTimeout(() => window.location.reload(), 1500);
+            setMessage('Profile updated successfully!');
         } catch (err) {
             console.error(err);
             setError(err.response?.data?.message || 'Failed to update profile');
-            toast.error(err.response?.data?.message || 'Failed to update profile');
         } finally {
             setLoading(false);
         }
@@ -119,6 +123,7 @@ const UserProfile = () => {
     const handlePasswordChange = async (e) => {
         e.preventDefault();
 
+        // Validate passwords match
         if (newPassword !== confirmPassword) {
             toast.error('New passwords do not match');
             return;
@@ -132,7 +137,18 @@ const UserProfile = () => {
         setLoadingPassword(true);
 
         try {
-            await api.put('/auth/change-password', { currentPassword, newPassword });
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${user.token}`
+                }
+            };
+
+            await axios.put('/api/auth/change-password',
+                { currentPassword, newPassword },
+                config
+            );
+
             toast.success('Password updated successfully!');
             setCurrentPassword('');
             setNewPassword('');
@@ -329,11 +345,11 @@ const UserProfile = () => {
                     ) : (
                         <div className="grid gap-6">
                             {orders.map(order => (
-                                <div key={order._id || order.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                                <div key={order.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                                     <div className="p-4 bg-gray-50 flex justify-between items-center border-b border-gray-100">
                                         <div>
-                                            <p className="text-xs text-gray-500 uppercase font-bold">Order #{order._id || order.id}</p>
-                                            <p className="text-sm text-gray-600">{new Date(order.createdAt || order.created_at).toLocaleDateString()}</p>
+                                            <p className="text-xs text-gray-500 uppercase font-bold">Order #{order.id}</p>
+                                            <p className="text-sm text-gray-600">{new Date(order.created_at).toLocaleDateString()}</p>
                                         </div>
                                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${order.status === 'completed' ? 'bg-green-100 text-green-700' :
                                             order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
@@ -345,10 +361,11 @@ const UserProfile = () => {
                                     <div className="p-4">
                                         <div className="flex justify-between items-start mb-4">
                                             <div>
-                                                <p className="font-semibold text-gray-900">{order.shop_id?.name || order.shop_name}</p>
-                                                <p className="text-sm text-gray-500">Total: <span className="text-primary-600 font-bold">${order.totalPrice || order.total_amount}</span></p>
+                                                <p className="font-semibold text-gray-900">{order.shop_name}</p>
+                                                <p className="text-sm text-gray-500">Total: <span className="text-primary-600 font-bold">${order.total_amount}</span></p>
                                             </div>
                                         </div>
+                                        {/* Simple toggle for items could go here, for now just summary */}
                                     </div>
                                 </div>
                             ))}

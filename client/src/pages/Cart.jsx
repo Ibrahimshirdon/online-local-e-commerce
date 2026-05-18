@@ -1,13 +1,11 @@
 import { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import api, { imageBaseUrl } from '../api/axios';
 import CartContext from '../context/CartContext';
 import { FaTrash, FaMinus, FaPlus, FaArrowRight } from 'react-icons/fa';
 
 const Cart = () => {
     const { cartItems, removeFromCart, updateQuantity, getCartTotal, clearCart } = useContext(CartContext);
     const navigate = useNavigate();
-
 
     if (cartItems.length === 0) {
         return (
@@ -34,10 +32,9 @@ const Cart = () => {
                                 {/* Product Image */}
                                 <div className="w-24 h-24 flex-shrink-0 bg-gray-50 rounded-lg overflow-hidden">
                                     <img
-                                        src={item.product.images && item.product.images.length > 0 ? (item.product.images[0].image_url.startsWith('http') ? item.product.images[0].image_url : `${imageBaseUrl}${item.product.images[0].image_url}`) : 'https://via.placeholder.com/150'}
+                                        src={item.product.images && item.product.images.length > 0 ? (item.product.images[0].image_url.startsWith('http') ? item.product.images[0].image_url : `${item.product.images[0].image_url}`) : 'https://via.placeholder.com/150'}
                                         alt={item.product.name}
                                         className="w-full h-full object-contain"
-                                        onError={(e) => e.target.src = 'https://via.placeholder.com/150'}
                                     />
                                 </div>
 

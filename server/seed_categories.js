@@ -1,4 +1,3 @@
-// Replaced Mongoose version with MySQL version
 const db = require('./config/db');
 const Category = require('./models/Category');
 
@@ -18,10 +17,9 @@ const seedCategories = async () => {
         console.log('🌱 Seeding categories...');
 
         for (const category of categories) {
-            // Basic existing check
-            const [existing] = await db.execute('SELECT * FROM categories WHERE name = ?', [category.name]);
+            const existing = await Category.findOne({ name: category.name });
 
-            if (existing.length === 0) {
+            if (!existing) {
                 await Category.create(category);
                 console.log(`✅ Inserted category: ${category.name}`);
             } else {
@@ -38,3 +36,4 @@ const seedCategories = async () => {
 };
 
 seedCategories();
+

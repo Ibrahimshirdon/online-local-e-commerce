@@ -2,7 +2,7 @@ const Notification = require('../models/Notification');
 
 exports.getNotifications = async (req, res) => {
     try {
-        const notifications = await Notification.find({ user_id: req.user._id }).sort('-createdAt');
+        const notifications = await Notification.find({ user_id: req.user.id });
         res.json(notifications);
     } catch (error) {
         console.error(error);
@@ -22,7 +22,7 @@ exports.markAsRead = async (req, res) => {
 
 exports.getUnreadCount = async (req, res) => {
     try {
-        const count = await Notification.countDocuments({ user_id: req.user._id, is_read: false });
+        const count = await Notification.countDocuments({ user_id: req.user.id, is_read: false });
         res.json({ count });
     } catch (error) {
         console.error(error);

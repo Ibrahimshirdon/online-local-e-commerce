@@ -3,19 +3,30 @@ const bcrypt = require('bcryptjs');
 
 const createAdmin = async () => {
     try {
-        console.log('Connecting to DB...');
-        // Test connection
-        await db.query('SELECT 1');
-
+        console.log('Connecting to Firestore...');
         const hashedPassword = await bcrypt.hash('123456', 10);
+        
+        const adminEmail = 'admin@gmail.com';
+        
         // Check if admin exists
-        const [users] = await db.query("SELECT * FROM users WHERE email = 'admin@gmail.com'");
-        if (users.length > 0) {
+        const snapshot = await db.collection('users').where('email', '==', adminEmail).get();
+        
+        if (!snapshot.empty) {
             console.log('Admin user exists, updating password...');
-            await db.query("UPDATE users SET password = ?, role = 'admin' WHERE email = 'admin@gmail.com'", [hashedPassword]);
+            const docId = snapshot.docs[0].id;
+            await db.collection('users').doc(docId).update({
+                password: hashedPassword,
+                role: 'admin'
+            });
         } else {
             console.log('Creating admin user...');
-            await db.query("INSERT INTO users (name, email, password, role) VALUES ('Admin', 'admin@gmail.com', ?, 'admin')", [hashedPassword]);
+            await db.collection('users').add({
+                name: 'Admin',
+                email: adminEmail,
+                password: hashedPassword,
+                role: 'admin',
+                created_at: new Date().toISOString()
+            });
         }
         console.log('Admin user ready: admin@gmail.com / 123456');
     } catch (error) {

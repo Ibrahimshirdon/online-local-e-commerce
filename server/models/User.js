@@ -1,76 +1,78 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+const db = require('../config/db');
+const collectionName = 'users';
 
-const userSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: [true, 'Please add a name'],
-        trim: true
-    },
-    email: {
-        type: String,
-        required: [true, 'Please add an email'],
-        unique: true,
-        match: [
-            /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-            'Please add a valid email'
-        ]
-    },
-    password: {
-        type: String,
-        required: [true, 'Please add a password'],
-        minlength: 6,
-        select: false
-    },
-    phone: {
-        type: String,
-        trim: true
-    },
-    role: {
-        type: String,
-        enum: ['user', 'seller', 'admin'],
-        default: 'user'
-    },
-    profile_image: {
-        type: String,
-        default: null
-    },
-    is_verified: {
-        type: Boolean,
-        default: false
-    },
-    resetPasswordToken: String,
-    resetPasswordExpire: Date,
-    createdAt: {
-        type: Date,
-        default: Date.now
+class User {
+    static async create({ name, email, password, phone, role, profile_image }) {
+        const newUser = {
+            name,
+            email,
+            password,
+            phone: phone || null,
+            role: role || 'user',
+            profile_image: profile_image || null,
+            created_at: new Date().toISOString()
+        };
+        const docRef = await db.collection(collectionName).add(newUser);
+        return { id: docRef.id, name, email, role: newUser.role };
     }
-}, {
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
-});
 
-// Encrypt password using bcrypt
-userSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) {
-        next();
+    static async findByEmail(email) {
+        const snapshot = await db.collection(collectionName).where('email', '==', email).limit(1).get();
+        if (snapshot.empty) return null;
+        const doc = snapshot.docs[0];
+        return { id: doc.id, ...doc.data() };
     }
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-});
 
-// Match user entered password to hashed password in database
-userSchema.methods.matchPassword = async function (enteredPassword) {
-    return await bcrypt.compare(enteredPassword, this.password);
-};
+    static async findByEmailOrName(identifier) {
+        // Firestore doesn't support OR queries across different fields easily without composite indexes or client side merge.
+        // We'll query both and merge.
+        const emailSnap = await db.collection(collectionName).where('email', '==', identifier).limit(1).get();
+        if (!emailSnap.empty) {
+            const doc = emailSnap.docs[0];
+            return { id: doc.id, ...doc.data() };
+        }
+        
+        const nameSnap = await db.collection(collectionName).where('name', '==', identifier).limit(1).get();
+        if (!nameSnap.empty) {
+            const doc = nameSnap.docs[0];
+            return { id: doc.id, ...doc.data() };
+        }
+        
+        return null;
+    }
 
-// Static methods to maintain compatibility with existing controller logic if possible
-userSchema.statics.findByEmail = function (email) {
-    return this.findOne({ email }).select('+password');
-};
+    static async findById(id) {
+        if (!id) return null;
+        const doc = await db.collection(collectionName).doc(id.toString()).get();
+        if (!doc.exists) return null;
+        return { id: doc.id, ...doc.data() };
+    }
 
-userSchema.statics.findByEmailOrName = function (identifier) {
-    return this.findOne({ $or: [{ email: identifier }, { name: identifier }] }).select('+password');
-};
+    static async findByIdAndUpdate(id, updateData) {
+        if (!id) return null;
+        const docRef = db.collection(collectionName).doc(id.toString());
+        await docRef.update(updateData);
+        const doc = await docRef.get();
+        return { id: doc.id, ...doc.data() };
+    }
 
-module.exports = mongoose.model('User', userSchema);
+    static async findByIdAndDelete(id) {
+        if (!id) return null;
+        await db.collection(collectionName).doc(id.toString()).delete();
+        return true;
+    }
+
+    static async countDocuments() {
+        // Firestore count query (available in recent SDKs)
+        const snapshot = await db.collection(collectionName).count().get();
+        return snapshot.data().count;
+    }
+
+    static async find() {
+        const snapshot = await db.collection(collectionName).get();
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    }
+}
+
+module.exports = User;
+

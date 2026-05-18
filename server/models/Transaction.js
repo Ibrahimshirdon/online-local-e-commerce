@@ -1,25 +1,33 @@
-const mongoose = require('mongoose');
+const db = require('../config/db');
+const collectionName = 'transactions';
 
-const transactionSchema = new mongoose.Schema({
-    shop_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Shop',
-        required: true
-    },
-    amount: {
-        type: Number,
-        required: true
-    },
-    type: {
-        type: String,
-        enum: ['credit', 'debit'],
-        required: true
-    },
-    description: String,
-    createdAt: {
-        type: Date,
-        default: Date.now
+class Transaction {
+    static async create(data) {
+        const { shop_id, amount, type, description } = data;
+        await db.collection(collectionName).add({
+            shop_id: shop_id ? shop_id.toString() : null,
+            amount: Number(amount),
+            type,
+            description,
+            created_at: new Date().toISOString()
+        });
     }
-});
 
-module.exports = mongoose.model('Transaction', transactionSchema);
+    static async find(query = {}) {
+        const snapshot = await db.collection(collectionName).orderBy('created_at', 'desc').get();
+        let results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        for (let t of results) {
+            if (t.shop_id) {
+                const shopDoc = await db.collection('shops').doc(t.shop_id).get();
+                if (shopDoc.exists) {
+                    t.shop_id = { id: shopDoc.id, name: shopDoc.data().name };
+                }
+            }
+        }
+        return results;
+    }
+}
+
+module.exports = Transaction;
+

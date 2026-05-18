@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import api from '../api/axios';
+import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import AuthContext from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -18,7 +18,6 @@ const SellerDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('overview');
     const navigate = useNavigate();
-    const imageBaseUrl = import.meta.env.VITE_IMAGE_BASE_URL || '';
 
     // Form state for new shop
     const [newShop, setNewShop] = useState({
@@ -65,35 +64,37 @@ const SellerDashboard = () => {
 
         const fetchData = async () => {
             try {
+                const config = {
+                    headers: { Authorization: `Bearer ${user.token}` }
+                };
+
                 // Get Shop
                 try {
-                    const { data: shopData } = await api.get('/shops/my-shop');
+                    const { data: shopData } = await axios.get('/api/shops/my-shop', config);
                     setShop(shopData);
 
-                    if (shopData && (shopData.status === 'approved' || shopData.status === 'active')) {
+                    if (shopData && shopData.status === 'approved') {
                         // Get Products
-                        const { data: prodData } = await api.get('/products');
-                        const shopId = shopData._id || shopData.id;
+                        const { data: prodData } = await axios.get('/api/products');
                         setProducts(prodData.filter(p => {
-                            const pShopId = typeof p.shop_id === 'object' ? (p.shop_id._id || p.shop_id.id) : p.shop_id;
-                            return String(pShopId) === String(shopId);
+                            const pShopId = typeof p.shop_id === 'object' ? (p.shop_id.id || p.shop_id._id) : p.shop_id;
+                            return String(pShopId) === String(shopData.id);
                         }));
 
                         // Get Orders
                         try {
-                            const { data: orderData } = await api.get(`/orders/shop/${shopId}`);
+                            const { data: orderData } = await axios.get(`/api/orders/shop/${shopData.id}`, config);
                             setOrders(orderData);
                         } catch (err) {
                             console.error("Error fetching orders:", err);
                         }
 
                         // Get Categories
-                        const { data: catData } = await api.get('/categories');
+                        const { data: catData } = await axios.get('/api/categories');
                         setCategories(catData);
                     }
                 } catch (err) {
-                    // No shop found or error
-                    console.log("No shop found");
+                    // No shop found
                 }
 
                 setLoading(false);
@@ -109,6 +110,13 @@ const SellerDashboard = () => {
     const handleCreateShop = async (e) => {
         e.preventDefault();
         try {
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${user.token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            };
+
             const formData = new FormData();
             formData.append('name', newShop.name);
             formData.append('description', newShop.description);
@@ -119,12 +127,10 @@ const SellerDashboard = () => {
                 formData.append('logo', newShop.logo);
             }
 
-            const { data } = await api.post('/shops', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            const { data } = await axios.post('/api/shops', formData, config);
             setShop(data);
-            toast.success('Shop application submitted!');
-            setTimeout(() => window.location.reload(), 1500);
+            // Force reload to ensure state is consistent and "Pending" screen persists
+            window.location.reload();
         } catch (error) {
             console.error(error);
             toast.error(error.response?.data?.message || 'Error creating shop');
@@ -134,6 +140,13 @@ const SellerDashboard = () => {
     const handleUpdateShop = async (e) => {
         e.preventDefault();
         try {
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${user.token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            };
+
             const formData = new FormData();
             formData.append('name', editShopData.name);
             formData.append('description', editShopData.description);
@@ -144,9 +157,7 @@ const SellerDashboard = () => {
                 formData.append('logo', editShopData.logo);
             }
 
-            const { data } = await api.put('/shops/my-shop', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            const { data } = await axios.put('/api/shops/my-shop', formData, config);
             setShop(data);
             setShowEditShop(false);
             toast.success('Shop updated successfully!');
@@ -198,8 +209,11 @@ const SellerDashboard = () => {
             type: 'warning',
             onConfirm: async () => {
                 try {
-                    await api.delete(`/products/${editingProduct._id || editingProduct.id}/images/${imageId}`);
-                    setExistingImages(existingImages.filter(img => (img._id || img.id) !== imageId));
+                    const config = {
+                        headers: { Authorization: `Bearer ${user.token}` }
+                    };
+                    await axios.delete(`/api/products/${editingProduct.id}/images/${imageId}`, config);
+                    setExistingImages(existingImages.filter(img => img.id !== imageId));
                     toast.success('Image deleted successfully');
                 } catch (error) {
                     console.error(error);
@@ -225,7 +239,14 @@ const SellerDashboard = () => {
         }
 
         try {
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${user.token}`
+                }
+            };
+
             const formData = new FormData();
+            formData.append('shop_id', shop.id);
             formData.append('name', newProduct.name);
             formData.append('brand', newProduct.brand);
             formData.append('model', newProduct.model);
@@ -246,23 +267,18 @@ const SellerDashboard = () => {
             });
 
             if (editingProduct) {
-                await api.put(`/products/${editingProduct._id || editingProduct.id}`, formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
+                await axios.put(`/api/products/${editingProduct.id}`, formData, config);
                 toast.success('Product updated!');
             } else {
-                await api.post('/products', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
+                await axios.post('/api/products', formData, config);
                 toast.success('Product added!');
             }
 
             // Refresh products
-            const { data: prodData } = await api.get('/products');
-            const shopId = shop._id || shop.id;
+            const { data: prodData } = await axios.get('/api/products');
             setProducts(prodData.filter(p => {
-                const pShopId = typeof p.shop_id === 'object' ? (p.shop_id._id || p.shop_id.id) : p.shop_id;
-                return String(pShopId) === String(shopId);
+                const pShopId = typeof p.shop_id === 'object' ? (p.shop_id.id || p.shop_id._id) : p.shop_id;
+                return String(pShopId) === String(shop.id);
             }));
             setNewProduct({ name: '', brand: '', model: '', description: '', price: '', discount_price: '', stock: '', condition: 'new', category_id: 1, delivery_info: '', delivery_fee: '', is_black_friday: false, is_out_of_stock: false, images: [] });
             setImagePreviews([]);
@@ -271,7 +287,7 @@ const SellerDashboard = () => {
             setShowAddProduct(false);
         } catch (error) {
             console.error(error);
-            toast.error(error.response?.data?.message || 'Error saving product');
+            toast.error('Error saving product');
         }
     };
 
@@ -508,7 +524,7 @@ const SellerDashboard = () => {
                 <div className="p-6 border-t border-gray-800 bg-gray-900/50">
                     <div className="flex items-center gap-3">
                         <img
-                            src={shop.logo_url?.startsWith('http') ? shop.logo_url : `${imageBaseUrl}${shop.logo_url}` || 'https://via.placeholder.com/50'}
+                            src={shop.logo_url?.startsWith('http') ? shop.logo_url : `${shop.logo_url}` || 'https://via.placeholder.com/50'}
                             className="w-10 h-10 rounded-full object-cover border border-gray-700 bg-gray-800"
                             alt="Shop Logo"
                             onError={(e) => e.target.src = 'https://via.placeholder.com/50'}
@@ -548,7 +564,7 @@ const SellerDashboard = () => {
                         {/* Shop Info Card */}
                         <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 flex flex-col md:flex-row items-center md:items-start gap-8">
                             <img
-                                src={shop.logo_url ? (shop.logo_url.startsWith('http') ? shop.logo_url : `${imageBaseUrl}${shop.logo_url}`) : 'https://via.placeholder.com/150'}
+                                src={shop.logo_url ? (shop.logo_url.startsWith('http') ? shop.logo_url : `${shop.logo_url}`) : 'https://via.placeholder.com/150'}
                                 alt={shop.name}
                                 className="w-32 h-32 rounded-2xl object-cover shadow-lg border-4 border-white ring-1 ring-gray-100"
                             />
@@ -575,7 +591,9 @@ const SellerDashboard = () => {
                             <div
                                 onClick={async () => {
                                     try {
-                                        const { data } = await api.get('/shops/my-shop/stats');
+                                        const { data } = await axios.get('/api/shops/my-shop/stats', {
+                                            headers: { Authorization: `Bearer ${user.token}` }
+                                        });
                                         setStats(data);
                                         setShowStatsModal(true);
                                     } catch (err) {
@@ -758,7 +776,7 @@ const SellerDashboard = () => {
 
                                                     <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                                                     <select className="w-full p-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all" value={newProduct.category_id} onChange={e => setNewProduct({ ...newProduct, category_id: e.target.value })}>
-                                                        {categories.map(cat => <option key={cat._id || cat.id} value={cat._id || cat.id}>{cat.name}</option>)}
+                                                        {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
                                                     </select>
                                                 </div>
                                             </div>
@@ -774,7 +792,7 @@ const SellerDashboard = () => {
                                                     <div className="grid grid-cols-4 gap-4">
                                                         {existingImages.map(img => (
                                                             <div key={img.id} className="relative aspect-square rounded-lg overflow-hidden group">
-                                                                <img src={img.image_url.startsWith('http') ? img.image_url : `${imageBaseUrl}${img.image_url}`} className="w-full h-full object-cover" />
+                                                                <img src={img.image_url.startsWith('http') ? img.image_url : `${img.image_url}`} className="w-full h-full object-cover" />
                                                                 <button type="button" onClick={() => removeExistingImage(img.id)} className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity"><FaTrash /></button>
                                                             </div>
                                                         ))}
@@ -810,7 +828,7 @@ const SellerDashboard = () => {
                                         <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
                                             {p.images && p.images.length > 0 ? (
                                                 <img
-                                                    src={p.images[0].image_url.startsWith('http') ? p.images[0].image_url : `${imageBaseUrl}${p.images[0].image_url}`}
+                                                    src={p.images[0].image_url.startsWith('http') ? p.images[0].image_url : `${p.images[0].image_url}`}
                                                     alt={p.name}
                                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                                 />
@@ -823,10 +841,8 @@ const SellerDashboard = () => {
                                                     if (window.confirm('Delete this product?')) {
                                                         const deleteProd = async () => {
                                                             try {
-                                                                const prodId = p._id || p.id;
-                                                                await api.delete(`/products/${prodId}`);
-                                                                setProducts(products.filter(item => (item._id || item.id) !== prodId));
-                                                                toast.success('Product deleted successfully');
+                                                                await axios.delete(`/api/products/${p.id}`, { headers: { Authorization: `Bearer ${user.token}` } });
+                                                                setProducts(products.filter(item => item.id !== p.id));
                                                             } catch (err) { toast.error('Failed to delete'); }
                                                         };
                                                         deleteProd();
@@ -881,15 +897,15 @@ const SellerDashboard = () => {
                                         <div className="p-4 border-b border-gray-100 flex flex-wrap justify-between items-center gap-4 bg-gray-50">
                                             <div>
                                                 <p className="text-xs text-gray-500 uppercase font-bold">Order ID</p>
-                                                <p className="font-mono text-gray-800">#{order._id || order.id}</p>
+                                                <p className="font-mono text-gray-800">#{order.id}</p>
                                             </div>
                                             <div>
                                                 <p className="text-xs text-gray-500 uppercase font-bold">Date</p>
-                                                <p className="text-gray-800">{new Date(order.createdAt || order.created_at).toLocaleDateString()}</p>
+                                                <p className="text-gray-800">{new Date(order.created_at).toLocaleDateString()}</p>
                                             </div>
                                             <div>
                                                 <p className="text-xs text-gray-500 uppercase font-bold">Customer</p>
-                                                <p className="text-gray-800 font-medium">{order.user_id?.name || order.customer_name}</p>
+                                                <p className="text-gray-800 font-medium">{order.customer_name}</p>
                                                 {order.phone && (
                                                     <p className="text-sm text-indigo-600 flex items-center gap-1">
                                                         <FaPhone className="text-xs" /> {order.phone}
@@ -925,7 +941,7 @@ const SellerDashboard = () => {
                                             </div>
                                             <div>
                                                 <p className="text-xs text-gray-500 uppercase font-bold">Total</p>
-                                                <p className="text-indigo-600 font-bold">${order.totalPrice || order.total_amount}</p>
+                                                <p className="text-indigo-600 font-bold">${order.total_amount}</p>
                                             </div>
                                         </div>
 
@@ -943,12 +959,12 @@ const SellerDashboard = () => {
                                                         <tr key={idx}>
                                                             <td className="py-3 flex items-center gap-2">
                                                                 <img
-                                                                    src={item.product_id?.images?.[0]?.image_url ? (item.product_id.images[0].image_url.startsWith('http') ? item.product_id.images[0].image_url : `${imageBaseUrl}${item.product_id.images[0].image_url}`) : (item.image_url?.startsWith('http') ? item.image_url : `${imageBaseUrl}${item.image_url}`)}
+                                                                    src={item.image_url?.startsWith('http') ? item.image_url : `${item.image_url}`}
                                                                     className="w-10 h-10 rounded object-cover bg-gray-100"
-                                                                    alt={item.product_id?.name || item.name}
+                                                                    alt={item.name}
                                                                     onError={(e) => e.target.src = 'https://via.placeholder.com/40'}
                                                                 />
-                                                                <span className="font-medium text-gray-800">{item.product_id?.name || item.name}</span>
+                                                                <span className="font-medium text-gray-800">{item.name}</span>
                                                             </td>
                                                             <td className="py-3 text-center text-gray-600">x{item.quantity}</td>
                                                             <td className="py-3 text-right font-medium text-gray-800">${item.price}</td>
@@ -969,9 +985,8 @@ const SellerDashboard = () => {
                                                                 confirmText: 'Mark as Processing',
                                                                 onConfirm: async () => {
                                                                     try {
-                                                                        const orderId = order._id || order.id;
-                                                                        await api.put(`/orders/${orderId}/status`, { status: 'processing' });
-                                                                        setOrders(orders.map(o => (o._id || o.id) === orderId ? { ...o, status: 'processing' } : o));
+                                                                        await axios.put(`/api/orders/${order.id}/status`, { status: 'processing' }, { headers: { Authorization: `Bearer ${user.token}` } });
+                                                                        setOrders(orders.map(o => o.id === order.id ? { ...o, status: 'processing' } : o));
                                                                         toast.success('Order marked as processing');
                                                                     } catch (e) { toast.error('Error updating status'); }
                                                                 }
@@ -993,9 +1008,8 @@ const SellerDashboard = () => {
                                                                 confirmText: 'Mark as Completed',
                                                                 onConfirm: async () => {
                                                                     try {
-                                                                        const orderId = order._id || order.id;
-                                                                        await api.put(`/orders/${orderId}/status`, { status: 'completed' });
-                                                                        setOrders(orders.map(o => (o._id || o.id) === orderId ? { ...o, status: 'completed' } : o));
+                                                                        await axios.put(`/api/orders/${order.id}/status`, { status: 'completed' }, { headers: { Authorization: `Bearer ${user.token}` } });
+                                                                        setOrders(orders.map(o => o.id === order.id ? { ...o, status: 'completed' } : o));
                                                                         toast.success('Order marked as completed');
                                                                     } catch (e) { toast.error('Error updating status'); }
                                                                 }
@@ -1028,7 +1042,7 @@ const SellerDashboard = () => {
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Shop Logo</label>
                                         <div className="flex items-center gap-6">
                                             <img
-                                                src={editShopData.logo ? URL.createObjectURL(editShopData.logo) : (shop.logo_url?.startsWith('http') ? shop.logo_url : `${imageBaseUrl}${shop.logo_url}`)}
+                                                src={editShopData.logo ? URL.createObjectURL(editShopData.logo) : (shop.logo_url?.startsWith('http') ? shop.logo_url : `${shop.logo_url}`)}
                                                 className="w-20 h-20 rounded-full object-cover border border-gray-200"
                                                 onError={(e) => e.target.src = 'https://via.placeholder.com/80'}
                                             />
@@ -1061,7 +1075,8 @@ const SellerDashboard = () => {
                                             onClick={async () => {
                                                 if (window.confirm('Are you sure you want to delete your shop? This action cannot be undone and you will lose all products.')) {
                                                     try {
-                                                        await api.delete('/shops/my-shop');
+                                                        const config = { headers: { Authorization: `Bearer ${user.token}` } };
+                                                        await axios.delete('/api/shops/my-shop', config);
                                                         toast.success('Shop deleted successfully.');
                                                         window.location.reload();
                                                     } catch (error) {

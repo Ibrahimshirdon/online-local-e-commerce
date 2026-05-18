@@ -8,7 +8,7 @@ const Notification = require('../models/Notification');
 exports.createReport = async (req, res) => {
     try {
         const { shopId, reason, description } = req.body;
-        const reporterId = req.user._id;
+        const reporterId = req.user.id;
 
         await Report.create({
             reporter_id: reporterId,
@@ -26,10 +26,7 @@ exports.createReport = async (req, res) => {
 
 exports.getAllReports = async (req, res) => {
     try {
-        const reports = await Report.find()
-            .populate('reporter_id', 'name email')
-            .populate('shop_id', 'name logo_url')
-            .sort('-createdAt');
+        const reports = await Report.find();
         res.json(reports);
     } catch (error) {
         console.error(error);
@@ -44,51 +41,49 @@ exports.updateReportStatus = async (req, res) => {
 
         const report = await Report.findByIdAndUpdate(reportId, { status }, { new: true });
 
-        if (!report) return res.status(404).json({ message: 'Report not found' });
-
-        if (status === 'resolved') {
-            // Strikes Logic
+        if (status === 'resolved' && report) {
+            // Use new Strikes Logic
             const shop = await Shop.findByIdAndUpdate(report.shop_id, { $inc: { strikes: 1 } }, { new: true });
+            const newStrikes = shop.strikes;
+            console.log(`Shop ${report.shop_id} Now Has ${newStrikes} Strikes.`);
 
-            if (shop) {
-                const newStrikes = shop.strikes;
-                console.log(`Shop ${shop.name} now has ${newStrikes} strikes.`);
+            // Check Rule: 3 Strikes = $10 Fine + Deactivation
+            if (newStrikes % 3 === 0) {
+                const fineAmount = 10.00;
 
-                // Check Rule: 3 Strikes = $10 Fine + Deactivation
-                if (newStrikes > 0 && newStrikes % 3 === 0) {
-                    const fineAmount = 10.00;
+                // 1. Deduct Balance
+                await Shop.findByIdAndUpdate(report.shop_id, {
+                    $inc: { balance: -fineAmount },
+                    status: 'deactivated'
+                });
 
-                    // 1. Deduct Balance and Deactivate
-                    shop.balance -= fineAmount;
-                    shop.status = 'deactivated';
-                    await shop.save();
+                // 2. Log into Transactions (Ledger)
+                await Transaction.create({
+                    shop_id: report.shop_id,
+                    amount: fineAmount,
+                    type: 'FINE',
+                    description: `Penalty for ${newStrikes} strikes. Shop Deactivated.`
+                });
 
-                    // 2. Log into Transactions
-                    await Transaction.create({
-                        shop_id: shop._id,
-                        amount: fineAmount,
-                        type: 'debit',
-                        description: `Penalty for reaching ${newStrikes} strikes.`
-                    });
-
-                    // 3. Notify Seller
-                    const message = `URGENT: Your shop "${shop.name}" has been deactivated due to receiving ${newStrikes} reports. A penalty fee of $10 has been charged to your account. Please contact support to reactivate.`;
+                // 3. Notify Seller
+                if (shop) {
+                    const message = `URGENT: Your shop "${shop.name}" has been deactivated due to receiving 3 consecutive reports. A penalty fee of $10 has been charged to your account. Please pay this fee to reactivate your services.`;
                     await Notification.create({
                         user_id: shop.owner_id,
                         message: message
                     });
-
-                    // Log Activity
-                    await ActivityLog.create({
-                        user_id: req.user._id,
-                        action: 'PENALTY_APPLIED',
-                        details: `Applied $10 fine and deactivated shop ${shop.name} for strike ${newStrikes}`
-                    });
                 }
+
+                // Log Activity
+                await ActivityLog.create({
+                    user_id: req.user.id,
+                    action: 'PENALTY',
+                    details: `Applied $10 fine and Deactivated Shop ${report.shop_id} for 3rd Strike`
+                });
             }
         }
 
-        res.json({ message: 'Report status updated', report });
+        res.json({ message: 'Report status updated' });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server Error' });
