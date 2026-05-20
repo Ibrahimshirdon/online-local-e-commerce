@@ -32,8 +32,16 @@ const upload = multer({
     },
 });
 
-router.post('/', upload.single('image'), (req, res) => {
-    res.send(`/${req.file.path.replace(/\\/g, '/')}`);
+router.post('/', upload.single('image'), async (req, res) => {
+    try {
+        const { uploadToFirebase } = require('../utils/firebaseStorage');
+        if (!req.file) return res.status(400).send('No image uploaded');
+        const url = await uploadToFirebase(req.file, 'uploads');
+        res.send(url);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Upload failed');
+    }
 });
 
 module.exports = router;

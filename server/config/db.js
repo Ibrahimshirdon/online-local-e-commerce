@@ -34,7 +34,10 @@ if (!admin.apps.length) {
         }
     }
 
-    admin.initializeApp({ credential });
+    admin.initializeApp({
+        credential,
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'list-veiwer-7481b.appspot.com'
+    });
     console.log(`🔌 Connected to Firebase Firestore`);
 }
 

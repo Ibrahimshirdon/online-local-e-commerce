@@ -56,12 +56,16 @@ exports.createProduct = async (req, res) => {
 
         const productData = { ...req.body };
 
+        const { uploadToFirebase } = require('../utils/firebaseStorage');
         // Handle multiple images
         if (req.files && req.files.length > 0) {
-            productData.images = req.files.map((file, index) => ({
-                image_url: `/uploads/${file.filename}`,
-                display_order: index
-            }));
+            const uploadPromises = req.files.map((file, index) => 
+                uploadToFirebase(file, 'products').then(url => ({
+                    image_url: url,
+                    display_order: index
+                }))
+            );
+            productData.images = await Promise.all(uploadPromises);
         }
 
         const product = await Product.create(productData);
@@ -106,12 +110,16 @@ exports.updateProduct = async (req, res) => {
         if (is_black_friday !== undefined) updateData.is_black_friday = is_black_friday === 'true' || is_black_friday === true;
         if (is_out_of_stock !== undefined) updateData.is_out_of_stock = is_out_of_stock === 'true' || is_out_of_stock === true;
 
-        // Handle new images if uploaded
+        const { uploadToFirebase } = require('../utils/firebaseStorage');
+        // Handle images append
         if (req.files && req.files.length > 0) {
-            updateData.images = req.files.map((file, index) => ({
-                image_url: `/uploads/${file.filename}`,
-                display_order: (product.images ? product.images.length : 0) + index
-            }));
+            const uploadPromises = req.files.map((file, index) => 
+                uploadToFirebase(file, 'products').then(url => ({
+                    image_url: url,
+                    display_order: (product.images ? product.images.length : 0) + index
+                }))
+            );
+            updateData.images = await Promise.all(uploadPromises);
         }
 
         const updatedProduct = await Product.update(req.params.id, updateData);
