@@ -201,7 +201,7 @@ const SellerDashboard = () => {
         setImagePreviews(newPreviews);
     };
 
-    const removeExistingImage = async (imageId) => {
+    const removeExistingImage = async (imageUrl) => {
         setConfirmDialog({
             isOpen: true,
             title: 'Delete Image',
@@ -212,8 +212,8 @@ const SellerDashboard = () => {
                     const config = {
                         headers: { Authorization: `Bearer ${user.token}` }
                     };
-                    await axios.delete(`/api/products/${editingProduct.id}/images/${imageId}`, config);
-                    setExistingImages(existingImages.filter(img => img.id !== imageId));
+                    await axios.delete(`/api/products/${editingProduct.id}/images?url=${encodeURIComponent(imageUrl)}`, config);
+                    setExistingImages(existingImages.filter(img => img.image_url !== imageUrl));
                     toast.success('Image deleted successfully');
                 } catch (error) {
                     console.error(error);
@@ -791,9 +791,9 @@ const SellerDashboard = () => {
                                                     <label className="block text-sm font-medium text-gray-700 mb-2">Product Images</label>
                                                     <div className="grid grid-cols-4 gap-4">
                                                         {existingImages.map(img => (
-                                                            <div key={img.id} className="relative aspect-square rounded-lg overflow-hidden group">
+                                                            <div key={img.image_url} className="relative aspect-square rounded-lg overflow-hidden group">
                                                                 <img src={img.image_url.startsWith('http') ? img.image_url : `${img.image_url}`} className="w-full h-full object-cover" />
-                                                                <button type="button" onClick={() => removeExistingImage(img.id)} className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity"><FaTrash /></button>
+                                                                <button type="button" onClick={() => removeExistingImage(img.image_url)} className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity"><FaTrash /></button>
                                                             </div>
                                                         ))}
                                                         {imagePreviews.map((src, idx) => (

@@ -154,16 +154,26 @@ exports.deleteProduct = async (req, res) => {
 
 exports.deleteProductImage = async (req, res) => {
     try {
-        const { productId, imageId } = req.params;
+        const { productId } = req.params;
+        const imageUrl = req.query.url;
 
-        // In SQL, we delete from product_images table directly
         const db = require('../config/db');
-        await db.execute('DELETE FROM product_images WHERE id = ? AND product_id = ?', [imageId, productId]);
+        const docRef = db.collection('products').doc(productId.toString());
+        const doc = await docRef.get();
+        
+        if (!doc.exists) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        const productData = doc.data();
+        const updatedImages = (productData.images || []).filter(img => img.image_url !== imageUrl);
+
+        await docRef.update({ images: updatedImages });
 
         await ActivityLog.create({
             user_id: req.user.id,
             action: 'DELETE_PRODUCT_IMAGE',
-            details: `Deleted image ID: ${imageId} from product ID: ${productId}`
+            details: `Deleted image from product ID: ${productId}`
         });
 
         res.json({ message: 'Image deleted successfully' });
