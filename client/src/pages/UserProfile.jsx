@@ -365,9 +365,37 @@ const UserProfile = () => {
                                                 <p className="text-sm text-gray-500">Total: <span className="text-primary-600 font-bold">${order.total_amount}</span></p>
                                             </div>
                                         </div>
-                                        {/* Simple toggle for items could go here, for now just summary */}
-                                    </div>
-                                </div>
+                                        <div className="mt-4">
+                                            <p className="text-sm font-semibold text-gray-700 mb-2">Order Items:</p>
+                                            <div className="bg-white rounded-lg border border-gray-100 overflow-hidden">
+                                                <table className="w-full text-sm text-left">
+                                                    <thead className="bg-gray-50 text-gray-500 border-b border-gray-100">
+                                                        <tr>
+                                                            <th className="px-4 py-2 font-medium">Item</th>
+                                                            <th className="px-4 py-2 text-center font-medium">Qty</th>
+                                                            <th className="px-4 py-2 text-right font-medium">Price</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="divide-y divide-gray-100">
+                                                        {order.items && order.items.map((item, idx) => (
+                                                            <tr key={idx}>
+                                                                <td className="px-4 py-3 flex items-center gap-3">
+                                                                    <img
+                                                                        src={item.image_url?.startsWith('http') ? item.image_url : `${item.image_url}`}
+                                                                        className="w-10 h-10 rounded object-cover bg-gray-100"
+                                                                        alt={item.name}
+                                                                        onError={(e) => e.target.src = 'https://via.placeholder.com/40'}
+                                                                    />
+                                                                    <span className="font-medium text-gray-800">{item.name}</span>
+                                                                </td>
+                                                                <td className="px-4 py-3 text-center text-gray-600">x{item.quantity}</td>
+                                                                <td className="px-4 py-3 text-right font-medium text-gray-800">${item.price}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
                             ))}
                         </div>
                     )}
