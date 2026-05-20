@@ -30,10 +30,12 @@ class Order {
         if (!userId) return [];
         const snapshot = await db.collection(collectionName)
             .where('user_id', '==', userId.toString())
-            .orderBy('created_at', 'desc')
             .get();
 
         let results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        // Sort in memory to avoid requiring a Firestore composite index
+        results.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
         // Fetch shop name
         for (let order of results) {
@@ -51,10 +53,12 @@ class Order {
         if (!shopId) return [];
         const snapshot = await db.collection(collectionName)
             .where('shop_id', '==', shopId.toString())
-            .orderBy('created_at', 'desc')
             .get();
 
         let results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        // Sort in memory to avoid requiring a Firestore composite index
+        results.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
         // Fetch customer name
         for (let order of results) {
