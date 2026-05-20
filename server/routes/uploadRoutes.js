@@ -34,9 +34,9 @@ const upload = multer({
 
 router.post('/', upload.single('image'), async (req, res) => {
     try {
-        const { uploadToFirebase } = require('../utils/firebaseStorage');
+        const { uploadToCloudinary } = require('../utils/cloudinary');
         if (!req.file) return res.status(400).send('No image uploaded');
-        const url = await uploadToFirebase(req.file, 'uploads');
+        const url = await uploadToCloudinary(req.file, 'uploads');
         res.send(url);
     } catch (error) {
         console.error(error);

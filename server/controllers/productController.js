@@ -56,11 +56,11 @@ exports.createProduct = async (req, res) => {
 
         const productData = { ...req.body };
 
-        const { uploadToFirebase } = require('../utils/firebaseStorage');
+        const { uploadToCloudinary } = require('../utils/cloudinary');
         // Handle multiple images
         if (req.files && req.files.length > 0) {
             const uploadPromises = req.files.map((file, index) => 
-                uploadToFirebase(file, 'products').then(url => ({
+                uploadToCloudinary(file, 'products').then(url => ({
                     image_url: url,
                     display_order: index
                 }))
@@ -78,10 +78,8 @@ exports.createProduct = async (req, res) => {
 
         res.status(201).json(product);
     } catch (error) {
-        console.error(error);
-        const fs = require('fs');
-        fs.appendFileSync('server_error.log', `${new Date().toISOString()} - ${error.message}\n${error.stack}\n\n`);
-        res.status(500).json({ message: 'Server Error', error: error.message });
+        console.error('Create Product Error:', error);
+        res.status(500).json({ message: 'Server Error', error: error.message, stack: error.stack });
     }
 };
 
@@ -110,11 +108,11 @@ exports.updateProduct = async (req, res) => {
         if (is_black_friday !== undefined) updateData.is_black_friday = is_black_friday === 'true' || is_black_friday === true;
         if (is_out_of_stock !== undefined) updateData.is_out_of_stock = is_out_of_stock === 'true' || is_out_of_stock === true;
 
-        const { uploadToFirebase } = require('../utils/firebaseStorage');
+        const { uploadToCloudinary } = require('../utils/cloudinary');
         // Handle images append
         if (req.files && req.files.length > 0) {
             const uploadPromises = req.files.map((file, index) => 
-                uploadToFirebase(file, 'products').then(url => ({
+                uploadToCloudinary(file, 'products').then(url => ({
                     image_url: url,
                     display_order: (product.images ? product.images.length : 0) + index
                 }))

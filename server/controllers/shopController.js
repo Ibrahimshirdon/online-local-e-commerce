@@ -20,9 +20,9 @@ exports.createShop = async (req, res) => {
             logo_url: req.body.logo_url // Fallback if sent as text
         };
 
-        const { uploadToFirebase } = require('../utils/firebaseStorage');
+        const { uploadToCloudinary } = require('../utils/cloudinary');
         if (req.file) {
-            shopData.logo_url = await uploadToFirebase(req.file, 'shops');
+            shopData.logo_url = await uploadToCloudinary(req.file, 'shops');
         }
 
         const shop = await Shop.create(shopData);
@@ -49,9 +49,9 @@ exports.updateShop = async (req, res) => {
         if (location) updateData.location = location;
         if (phone) updateData.phone = phone;
 
-        const { uploadToFirebase } = require('../utils/firebaseStorage');
+        const { uploadToCloudinary } = require('../utils/cloudinary');
         if (req.file) {
-            updateData.logo_url = await uploadToFirebase(req.file, 'shops');
+            updateData.logo_url = await uploadToCloudinary(req.file, 'shops');
         }
 
         if (Object.keys(updateData).length > 0) {

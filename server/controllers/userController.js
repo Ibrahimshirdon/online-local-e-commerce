@@ -29,9 +29,9 @@ exports.updateUserProfile = async (req, res) => {
             const updateData = {};
             if (req.body.name) updateData.name = req.body.name;
             if (req.body.phone) updateData.phone = req.body.phone;
-            const { uploadToFirebase } = require('../utils/firebaseStorage');
+            const { uploadToCloudinary } = require('../utils/cloudinary');
             if (req.file) {
-                updateData.profile_image = await uploadToFirebase(req.file, 'profiles');
+                updateData.profile_image = await uploadToCloudinary(req.file, 'profiles');
             }
 
             const updatedUser = await User.findByIdAndUpdate(user.id, updateData);
