@@ -150,6 +150,14 @@ class Product {
         const snapshot = await db.collection(collectionName).count().get();
         return snapshot.data().count;
     }
+
+    static async decreaseStock(id, quantity) {
+        if (!id) return;
+        const docRef = db.collection(collectionName).doc(id.toString());
+        await docRef.update({
+            stock: admin.firestore.FieldValue.increment(-Number(quantity))
+        });
+    }
 }
 
 module.exports = Product;

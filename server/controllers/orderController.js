@@ -68,8 +68,11 @@ exports.createOrder = async (req, res) => {
                     price: finalPrice
                 });
 
-                // Decrease stock (Simulated for now, would be good to have a method in Product model)
-                // await Product.decreaseStock(item.product.id, item.qty); 
+                // Decrease stock
+                const pId = item.product_id || (item.product && item.product.id);
+                if (pId) {
+                    await Product.decreaseStock(pId, item.qty);
+                }
             }
 
             createdOrders.push(orderId);
