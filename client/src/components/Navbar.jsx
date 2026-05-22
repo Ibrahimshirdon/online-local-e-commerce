@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { FaUser, FaStore, FaShoppingBag, FaSignOutAlt, FaCog, FaHeart, FaBell, FaHome, FaInfoCircle, FaQuestionCircle } from 'react-icons/fa';
+import { FaUser, FaStore, FaShoppingBag, FaSignOutAlt, FaCog, FaHeart, FaBell, FaHome, FaInfoCircle, FaQuestionCircle, FaBars, FaTimes } from 'react-icons/fa';
 import { useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import AuthContext from '../context/AuthContext';
@@ -10,6 +10,7 @@ const Navbar = () => {
     const { getCartCount } = useContext(CartContext);
     const [showDropdown, setShowDropdown] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
+    const [showMobileMenu, setShowMobileMenu] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const [notifications, setNotifications] = useState([]);
@@ -72,6 +73,7 @@ const Navbar = () => {
     const handleLogout = () => {
         logout();
         setShowDropdown(false);
+        setShowMobileMenu(false);
         navigate('/');
     };
 
@@ -94,74 +96,82 @@ const Navbar = () => {
                     </Link>
 
                     {/* Navigation Links */}
-                    <div className="flex items-center space-x-4 md:space-x-6">
+                    <div className="flex items-center space-x-2 md:space-x-4 lg:space-x-6">
 
-                        {/* Home Link (Always Visible) */}
-                        <Link
-                            to="/"
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300 hover:scale-105 font-medium ${scrolled
-                                ? 'text-primary-600 hover:bg-primary-50 hover:shadow-soft'
-                                : 'text-white hover:bg-white/20 backdrop-blur-sm'
-                                }`}
-                        >
-                            <FaHome className="text-lg" />
-                            <span className="hidden md:inline">Home</span>
-                        </Link>
+                        {/* DESKTOP ONLY LINKS */}
+                        <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
+                            {/* Home Link */}
+                            <Link
+                                to="/"
+                                className={`flex items-center gap-2 px-3 lg:px-4 py-2.5 rounded-xl transition-all duration-300 hover:scale-105 font-medium ${scrolled
+                                    ? 'text-primary-600 hover:bg-primary-50 hover:shadow-soft'
+                                    : 'text-white hover:bg-white/20 backdrop-blur-sm'
+                                    }`}
+                            >
+                                <FaHome className="text-lg" />
+                                <span>Home</span>
+                            </Link>
 
-                        <Link
-                            to="/about"
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300 hover:scale-105 font-medium ${scrolled
-                                ? 'text-primary-600 hover:bg-primary-50 hover:shadow-soft'
-                                : 'text-white hover:bg-white/20 backdrop-blur-sm'
-                                }`}
-                        >
-                            <FaInfoCircle className="text-lg" />
-                            <span className="hidden md:inline">About</span>
-                        </Link>
+                            <Link
+                                to="/about"
+                                className={`flex items-center gap-2 px-3 lg:px-4 py-2.5 rounded-xl transition-all duration-300 hover:scale-105 font-medium ${scrolled
+                                    ? 'text-primary-600 hover:bg-primary-50 hover:shadow-soft'
+                                    : 'text-white hover:bg-white/20 backdrop-blur-sm'
+                                    }`}
+                            >
+                                <FaInfoCircle className="text-lg" />
+                                <span>About</span>
+                            </Link>
 
-
-
-                        {user ? (
-                            <>
-                                {/* Favorites Link */}
-                                <Link
-                                    to="/favorites"
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all hover:scale-105 ${scrolled
-                                        ? 'text-primary-600 hover:bg-primary-50'
-                                        : 'text-white hover:bg-white/10'
-                                        }`}
-                                >
-                                    <FaHeart />
-                                    <span className="hidden md:inline">Favorites</span>
-                                </Link>
-
-                                {/* Seller Dashboard Link */}
-                                {(user.role === 'seller' || user.role === 'shop_owner' || user.role === 'admin') && (
+                            {user && (
+                                <>
+                                    {/* Favorites Link */}
                                     <Link
-                                        to="/seller/dashboard"
-                                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all hover:scale-105 ${scrolled
+                                        to="/favorites"
+                                        className={`flex items-center gap-2 px-3 lg:px-4 py-2 rounded-lg transition-all hover:scale-105 ${scrolled
                                             ? 'text-primary-600 hover:bg-primary-50'
                                             : 'text-white hover:bg-white/10'
                                             }`}
                                     >
-                                        <FaStore />
-                                        <span className="hidden md:inline">My Shop</span>
+                                        <FaHeart />
+                                        <span>Favorites</span>
                                     </Link>
-                                )}
 
-                                {/* Admin Dashboard Link */}
-                                {user.role === 'admin' && (
-                                    <Link
-                                        to="/admin/dashboard"
-                                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all hover:scale-105 ${scrolled
-                                            ? 'text-primary-600 hover:bg-primary-50'
-                                            : 'text-white hover:bg-white/10'
-                                            }`}
-                                    >
-                                        <FaCog />
-                                        <span className="hidden md:inline">Admin</span>
-                                    </Link>
-                                )}
+                                    {/* Seller Dashboard Link */}
+                                    {(user.role === 'seller' || user.role === 'shop_owner' || user.role === 'admin') && (
+                                        <Link
+                                            to="/seller/dashboard"
+                                            className={`flex items-center gap-2 px-3 lg:px-4 py-2 rounded-lg transition-all hover:scale-105 ${scrolled
+                                                ? 'text-primary-600 hover:bg-primary-50'
+                                                : 'text-white hover:bg-white/10'
+                                                }`}
+                                        >
+                                            <FaStore />
+                                            <span>My Shop</span>
+                                        </Link>
+                                    )}
+
+                                    {/* Admin Dashboard Link */}
+                                    {user.role === 'admin' && (
+                                        <Link
+                                            to="/admin/dashboard"
+                                            className={`flex items-center gap-2 px-3 lg:px-4 py-2 rounded-lg transition-all hover:scale-105 ${scrolled
+                                                ? 'text-primary-600 hover:bg-primary-50'
+                                                : 'text-white hover:bg-white/10'
+                                                }`}
+                                        >
+                                            <FaCog />
+                                            <span>Admin</span>
+                                        </Link>
+                                    )}
+                                </>
+                            )}
+                        </div>
+
+                        {/* ALWAYS VISIBLE LINKS (Mobile & Desktop) */}
+                        <div className="flex items-center space-x-1 sm:space-x-2">
+                            {user ? (
+                                <>
 
                                 {/* Cart Link */}
                                 <Link
@@ -248,7 +258,7 @@ const Navbar = () => {
                                                 user.name.charAt(0).toUpperCase()
                                             )}
                                         </div>
-                                        <span className="hidden md:inline font-medium">{user.name}</span>
+                                        <span className="hidden lg:inline font-medium">{user.name}</span>
                                     </button>
 
                                     {showDropdown && (
@@ -294,30 +304,94 @@ const Navbar = () => {
                             </>
                         ) : (
                             <>
-                                <Link
-                                    to="/register"
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all hover:scale-105 ${scrolled
-                                        ? 'text-primary-600 hover:bg-primary-50'
-                                        : 'text-white hover:bg-white/10'
-                                        }`}
-                                >
-                                    <FaStore />
-                                    <span className="hidden sm:inline">Sell</span>
-                                </Link>
-                                <Link
-                                    to="/login"
-                                    className={`px-6 py-2.5 rounded-xl font-semibold transition-all hover:scale-105 shadow-soft ${scrolled
-                                        ? 'bg-gradient-to-r from-primary-500 to-secondary-500 text-white hover:shadow-glow'
-                                        : 'bg-white text-primary-600 hover:shadow-medium'
-                                        }`}
-                                >
-                                    Login
-                                </Link>
+                                <div className="hidden md:flex items-center gap-4">
+                                    <Link
+                                        to="/register"
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all hover:scale-105 ${scrolled
+                                            ? 'text-primary-600 hover:bg-primary-50'
+                                            : 'text-white hover:bg-white/10'
+                                            }`}
+                                    >
+                                        <FaStore />
+                                        <span>Sell</span>
+                                    </Link>
+                                    <Link
+                                        to="/login"
+                                        className={`px-6 py-2.5 rounded-xl font-semibold transition-all hover:scale-105 shadow-soft ${scrolled
+                                            ? 'bg-gradient-to-r from-primary-500 to-secondary-500 text-white hover:shadow-glow'
+                                            : 'bg-white text-primary-600 hover:shadow-medium'
+                                            }`}
+                                    >
+                                        Login
+                                    </Link>
+                                </div>
                             </>
                         )}
+
+                        {/* Hamburger Icon (Mobile Only) */}
+                        <button
+                            onClick={() => setShowMobileMenu(true)}
+                            className={`md:hidden p-2 rounded-xl transition-all ${scrolled ? 'text-primary-600 hover:bg-primary-50' : 'text-white hover:bg-white/20'}`}
+                        >
+                            <FaBars className="text-xl" />
+                        </button>
+
+                        </div> {/* End of Always Visible Links */}
                     </div>
                 </div>
             </div>
+
+            {/* Mobile Menu Overlay */}
+            {showMobileMenu && (
+                <div className="fixed inset-0 z-[100] md:hidden">
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowMobileMenu(false)}></div>
+                    <div className="absolute top-0 right-0 bottom-0 w-4/5 max-w-sm bg-white shadow-2xl animate-slide-in-right overflow-y-auto flex flex-col">
+                        <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-primary-50 to-white">
+                            <h2 className="text-xl font-black text-gray-800">Menu</h2>
+                            <button onClick={() => setShowMobileMenu(false)} className="p-2 text-gray-500 hover:bg-red-50 hover:text-red-600 rounded-full transition-colors">
+                                <FaTimes className="text-xl" />
+                            </button>
+                        </div>
+                        
+                        <div className="flex-1 py-4 px-2 space-y-1">
+                            <Link to="/" onClick={() => setShowMobileMenu(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-600 font-medium">
+                                <FaHome className="text-lg" /> Home
+                            </Link>
+                            <Link to="/about" onClick={() => setShowMobileMenu(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-600 font-medium">
+                                <FaInfoCircle className="text-lg" /> About
+                            </Link>
+
+                            {user ? (
+                                <>
+                                    <Link to="/favorites" onClick={() => setShowMobileMenu(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-600 font-medium">
+                                        <FaHeart className="text-lg" /> Favorites
+                                    </Link>
+                                    {(user.role === 'seller' || user.role === 'shop_owner' || user.role === 'admin') && (
+                                        <Link to="/seller/dashboard" onClick={() => setShowMobileMenu(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-600 font-medium">
+                                            <FaStore className="text-lg" /> My Shop
+                                        </Link>
+                                    )}
+                                    {user.role === 'admin' && (
+                                        <Link to="/admin/dashboard" onClick={() => setShowMobileMenu(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-600 font-medium">
+                                            <FaCog className="text-lg" /> Admin Dashboard
+                                        </Link>
+                                    )}
+                                </>
+                            ) : (
+                                <>
+                                    <div className="h-px bg-gray-100 my-4 mx-2"></div>
+                                    <Link to="/login" onClick={() => setShowMobileMenu(false)} className="flex justify-center items-center gap-2 px-4 py-3 mx-2 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-xl font-bold hover:shadow-glow mb-2">
+                                        Login
+                                    </Link>
+                                    <Link to="/register" onClick={() => setShowMobileMenu(false)} className="flex justify-center items-center gap-2 px-4 py-3 mx-2 bg-gray-50 text-gray-700 rounded-xl font-bold hover:bg-gray-100">
+                                        <FaStore /> Sell on Galkacyo
+                                    </Link>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </nav >
     );
 };

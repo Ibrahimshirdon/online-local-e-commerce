@@ -238,7 +238,7 @@ const ProductDetails = () => {
                             )}
                         </div>
 
-                        <div className="flex gap-4 mb-4">
+                        <div className="flex flex-col sm:flex-row gap-4 mb-4">
                             <button
                                 onClick={() => {
                                     // Check if user is logged in
@@ -250,7 +250,7 @@ const ProductDetails = () => {
                                     addToCart(product);
                                     toast.success('Added to cart!');
                                 }}
-                                className="flex-1 bg-primary-600 text-white py-3 rounded-lg font-bold hover:bg-primary-700 transition-colors flex items-center justify-center"
+                                className="flex-1 w-full bg-primary-600 text-white py-3 rounded-lg font-bold hover:bg-primary-700 transition-colors flex items-center justify-center"
                             >
                                 <FaStore className="mr-2" /> Add to Cart
                             </button>
@@ -258,7 +258,7 @@ const ProductDetails = () => {
                                 href={whatsappLink}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex-1 bg-green-500 text-white py-3 rounded-lg font-bold hover:bg-green-600 transition-colors flex items-center justify-center"
+                                className="flex-1 w-full bg-green-500 text-white py-3 rounded-lg font-bold hover:bg-green-600 transition-colors flex items-center justify-center"
                             >
                                 <FaWhatsapp className="mr-2 text-2xl" /> WhatsApp
                             </a>

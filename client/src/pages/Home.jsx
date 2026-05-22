@@ -139,10 +139,10 @@ const Home = () => {
     }
 
     return (
-        <div className="animate-fadeIn space-y-16 pb-12">
+        <div className="animate-fadeIn space-y-12 md:space-y-16 pb-12 px-2 sm:px-4 md:px-0">
 
             {/* HERO SECTION */}
-            <section className="relative bg-gradient-to-br from-primary-900 via-primary-700 to-secondary-800 text-white rounded-[3rem] p-8 md:p-20 shadow-2xl overflow-hidden mt-6 mx-2 md:mx-0 border border-primary-600/20">
+            <section className="relative bg-gradient-to-br from-primary-900 via-primary-700 to-secondary-800 text-white rounded-3xl md:rounded-[3rem] p-6 sm:p-8 md:p-20 shadow-2xl overflow-hidden mt-4 md:mt-6 border border-primary-600/20">
                 {/* Animated Decorative Blobs */}
                 <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32 animate-float"></div>
                 <div className="absolute bottom-0 left-0 w-80 h-80 bg-secondary-400/20 rounded-full blur-3xl -ml-24 -mb-24 animate-float" style={{ animationDelay: '1s' }}></div>
@@ -154,26 +154,26 @@ const Home = () => {
                             <FaRocket className="text-yellow-300 animate-bounce" />
                             <span className="text-sm font-bold tracking-wide">The #1 Marketplace in Galkacyo</span>
                         </div>
-                        <h1 className="text-5xl md:text-7xl font-black leading-tight animate-slide-up text-shadow-lg">
+                        <h1 className="text-4xl sm:text-5xl md:text-7xl font-black leading-tight animate-slide-up text-shadow-lg">
                             Buy & Sell in <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-green-300 to-emerald-400 animate-shimmer bg-shimmer">
                                 Digital Speed
                             </span>
                         </h1>
-                        <p className="text-lg md:text-xl text-gray-100 max-w-xl leading-relaxed animate-slide-up" style={{ animationDelay: '0.2s' }}>
+                        <p className="text-base sm:text-lg md:text-xl text-gray-100 max-w-xl leading-relaxed animate-slide-up" style={{ animationDelay: '0.2s' }}>
                             Join thousands of trusted sellers and happy buyers. From electronics to fashion, find everything you need locally.
                         </p>
-                        <div className="flex flex-wrap gap-4 pt-4 animate-slide-up" style={{ animationDelay: '0.4s' }}>
+                        <div className="flex flex-col sm:flex-row gap-4 pt-4 animate-slide-up" style={{ animationDelay: '0.4s' }}>
                             <button
                                 onClick={() => document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth' })}
-                                className="group px-8 py-4 bg-white text-primary-800 rounded-2xl font-bold hover:bg-gray-50 transition-all hover:scale-105 shadow-2xl flex items-center gap-3 hover:shadow-white/20"
+                                className="group w-full sm:w-auto justify-center px-6 md:px-8 py-3 md:py-4 bg-white text-primary-800 rounded-xl md:rounded-2xl font-bold hover:bg-gray-50 transition-all hover:scale-105 shadow-2xl flex items-center gap-3 hover:shadow-white/20"
                             >
                                 Start Shopping
                                 <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
                             </button>
                             <button
                                 onClick={() => navigate('/seller/dashboard')}
-                                className="group px-8 py-4 glass-dark border-2 border-white/30 hover:bg-white/20 text-white rounded-2xl font-bold transition-all flex items-center gap-3 hover:scale-105"
+                                className="group w-full sm:w-auto justify-center px-6 md:px-8 py-3 md:py-4 glass-dark border-2 border-white/30 hover:bg-white/20 text-white rounded-xl md:rounded-2xl font-bold transition-all flex items-center gap-3 hover:scale-105"
                             >
                                 Open Your Shop
                                 <FaStore className="group-hover:scale-110 transition-transform" />
@@ -181,18 +181,18 @@ const Home = () => {
                         </div>
 
                         {/* Stats */}
-                        <div className="grid grid-cols-3 gap-6 pt-8 border-t border-white/20">
+                        <div className="grid grid-cols-3 gap-2 sm:gap-6 pt-6 sm:pt-8 border-t border-white/20">
                             <div className="text-center">
-                                <div className="text-3xl font-black text-yellow-300">500+</div>
-                                <div className="text-sm text-gray-300 mt-1">Products</div>
+                                <div className="text-2xl sm:text-3xl font-black text-yellow-300">500+</div>
+                                <div className="text-xs sm:text-sm text-gray-300 mt-1">Products</div>
                             </div>
                             <div className="text-center">
-                                <div className="text-3xl font-black text-green-300">100+</div>
-                                <div className="text-sm text-gray-300 mt-1">Sellers</div>
+                                <div className="text-2xl sm:text-3xl font-black text-green-300">100+</div>
+                                <div className="text-xs sm:text-sm text-gray-300 mt-1">Sellers</div>
                             </div>
                             <div className="text-center">
-                                <div className="text-3xl font-black text-blue-300">1000+</div>
-                                <div className="text-sm text-gray-300 mt-1">Happy Buyers</div>
+                                <div className="text-2xl sm:text-3xl font-black text-blue-300">1k+</div>
+                                <div className="text-xs sm:text-sm text-gray-300 mt-1">Buyers</div>
                             </div>
                         </div>
                     </div>
