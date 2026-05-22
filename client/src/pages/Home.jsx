@@ -97,12 +97,39 @@ const Home = () => {
 
     if (loading) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[80vh]">
-                <div className="relative">
-                    <div className="w-20 h-20 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
-                    <FaShoppingBag className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl text-primary-600" />
+            <div className="animate-pulse space-y-16 pb-12 mt-6 mx-2 md:mx-0">
+                {/* Hero Skeleton */}
+                <div className="w-full h-[500px] bg-gray-200 rounded-[3rem]"></div>
+                
+                {/* Categories Skeleton */}
+                <div className="space-y-4 px-2">
+                    <div className="h-10 bg-gray-200 rounded w-1/4"></div>
+                    <div className="flex gap-4 overflow-hidden">
+                        {[1, 2, 3, 4, 5, 6].map(i => (
+                            <div key={i} className="min-w-[120px] h-32 bg-gray-200 rounded-3xl"></div>
+                        ))}
+                    </div>
                 </div>
-                <p className="text-xl text-gray-600 mt-6 font-medium animate-pulse">Loading amazing deals...</p>
+
+                {/* Products Grid Skeleton */}
+                <div className="space-y-4 px-2">
+                    <div className="h-10 bg-gray-200 rounded w-1/4 mb-8"></div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                            <div key={i} className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden h-[400px]">
+                                <div className="h-64 bg-gray-200"></div>
+                                <div className="p-5 space-y-3">
+                                    <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                                    <div className="pt-4 border-t border-gray-100 flex justify-between">
+                                        <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+                                        <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
         );
     }
@@ -285,7 +312,7 @@ const Home = () => {
                 {filteredProducts.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {filteredProducts.map((product, index) => (
-                            <div key={product.id} className="transform hover:-translate-y-1 transition-transform duration-300">
+                            <div key={product.id} className="animate-fadeInScale" style={{ animationDelay: `${index * 0.08}s`, animationFillMode: 'both' }}>
                                 <ProductCard product={product} />
                             </div>
                         ))}

@@ -37,9 +37,10 @@ const ProductCard = ({ product }) => {
 
     return (
         <>
-            <div className="group bg-white rounded-3xl shadow-soft overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 animate-fade-in border border-gray-100 hover:border-primary-200">
+            <div className="group relative bg-white/80 backdrop-blur-xl rounded-3xl shadow-soft overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border border-white/40 hover:border-primary-300">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none z-0"></div>
                 {/* Product Image */}
-                <div className="relative h-64 overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+                <div className="relative h-64 overflow-hidden bg-gray-100 z-10">
                     <img
                         src={
                             product.images && product.images.length > 0
@@ -116,7 +117,7 @@ const ProductCard = ({ product }) => {
                 </div>
 
                 {/* Product Info */}
-                <div className="p-5">
+                <div className="relative p-6 z-10 bg-white/60">
                     <div className="mb-4">
                         <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-1 group-hover:text-primary-600 transition-colors">
                             {product.name}
@@ -136,9 +137,9 @@ const ProductCard = ({ product }) => {
 
                     {/* Price and Actions */}
                     <div className="pt-4 border-t border-gray-100">
-                        <div className="flex justify-between items-center mb-4">
+                        <div className="flex justify-between items-end mb-5">
                             <div>
-                                <p className="text-xs text-gray-500 mb-1 font-medium">Price</p>
+                                <p className="text-xs text-gray-400 mb-1 font-semibold tracking-wider uppercase">Price</p>
                                 <div className="flex flex-col">
                                     {product.discount_price && Number(product.discount_price) > 0 ? (
                                         <>
@@ -162,10 +163,10 @@ const ProductCard = ({ product }) => {
                             </div>
                         </div>
 
-                        <div className="flex gap-2">
+                        <div className="flex gap-3">
                             <Link
                                 to={`/product/${product.id}`}
-                                className="flex-1 px-4 py-3 bg-gray-50 text-gray-700 rounded-xl hover:bg-gray-100 transition-all font-semibold text-center hover:scale-105 hover:shadow-md"
+                                className="flex-1 px-4 py-3 bg-white/80 border border-gray-200 text-gray-700 rounded-2xl hover:bg-white hover:border-gray-300 transition-all font-bold text-center hover:shadow-md"
                             >
                                 Details
                             </Link>
@@ -183,7 +184,7 @@ const ProductCard = ({ product }) => {
                                     addToCart(product);
                                     toast.success('Added to cart!');
                                 }}
-                                className="flex-1 px-4 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-xl hover:shadow-glow-lg transition-all flex items-center justify-center gap-2 font-semibold hover:scale-105"
+                                className="flex-1 px-4 py-3 bg-gradient-to-r from-primary-600 to-secondary-600 text-white rounded-2xl hover:shadow-glow-lg transition-all flex items-center justify-center gap-2 font-bold hover:scale-[1.02]"
                             >
                                 <FaShoppingCart className="text-lg" /> Add
                             </button>
