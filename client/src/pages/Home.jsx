@@ -197,23 +197,20 @@ const Home = () => {
                         </div>
                     </div>
                     <div className="hidden lg:block relative">
-                        {/* Product Preview Grid */}
-                        <div className="glass-dark p-8 rounded-3xl backdrop-blur-xl border border-white/20 relative transform hover:rotate-0 transition-all duration-700 rotate-2 hover:scale-105">
-                            <div className="grid grid-cols-2 gap-4">
-                                {products.slice(0, 4).map((p, idx) => {
-                                    const imgUrl = p.images?.[0]?.image_url || p.image_url;
-                                    return (
-                                        <div key={p.id} className={`bg-white p-4 rounded-2xl shadow-xl transform transition-all duration-500 hover:scale-105 ${idx % 2 === 0 ? 'translate-y-4 hover:translate-y-2' : '-translate-y-4 hover:-translate-y-2'}`}>
-                                            {imgUrl ?
-                                                <img src={imgUrl.startsWith('http') ? imgUrl : `${imgUrl}`} className="w-full h-36 object-cover rounded-xl mb-3 shadow-md" alt={p.name} />
-                                                : <div className="w-full h-36 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl mb-3"></div>
-                                            }
-                                            <div className="h-3 w-24 bg-gray-200 rounded-full mb-2"></div>
-                                            <div className="h-3 w-16 bg-primary-200 rounded-full"></div>
-                                        </div>
-                                    )
-                                })}
-                            </div>
+                        {/* Promotional Image */}
+                        <div className="relative transform hover:-translate-y-4 transition-all duration-700 hover:scale-105 group">
+                            {/* Glow effect behind image */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-yellow-400 blur-2xl opacity-20 group-hover:opacity-40 transition-opacity duration-500 rounded-[3rem]"></div>
+                            
+                            <img 
+                                src="/suuqify-promo.png" 
+                                alt="Suuqify on Devices" 
+                                className="relative z-10 w-full h-auto rounded-[2rem] shadow-2xl border border-white/20"
+                                onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = "https://via.placeholder.com/600x400?text=Please+add+suuqify-promo.png+to+public+folder";
+                                }}
+                            />
                         </div>
                     </div>
                 </div>
