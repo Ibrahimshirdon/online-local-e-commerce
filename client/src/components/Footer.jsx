@@ -22,7 +22,7 @@ const Footer = () => {
                     {/* Brand Section */}
                     <div className="space-y-4">
                         <Link to="/" className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-400 to-secondary-400">
-                            Galkacyo Market
+                            Suuqify
                         </Link>
                         <p className="text-gray-400 leading-relaxed">
                             Connecting buyers and sellers in Mudug using digital speed. The most trusted marketplace for locals.
@@ -93,7 +93,7 @@ const Footer = () => {
                 </div>
 
                 <div className="border-t border-gray-800 pt-8 mt-8 flex flex-col md:flex-row justify-between items-center text-gray-500 text-sm">
-                    <p>&copy; {new Date().getFullYear()} Galkacyo Digital Market. All rights reserved.</p>
+                    <p>&copy; {new Date().getFullYear()} Suuqify. All rights reserved.</p>
                     <p className="flex items-center gap-1 mt-4 md:mt-0">
                         Developed with <FaHeart className="text-red-500 animate-pulse" /> by <span className="text-white font-semibold">Shirdon Tech</span>
                     </p>

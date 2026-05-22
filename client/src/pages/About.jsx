@@ -10,7 +10,7 @@ const About = () => {
             <section className="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-gray-100 flex flex-col md:flex-row items-center gap-12">
                 <div className="flex-1 space-y-6">
                     <div className="inline-block bg-primary-100 text-primary-700 font-bold px-4 py-2 rounded-full text-sm">
-                        About Galkacyo Market
+                        About Suuqify
                     </div>
                     <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight">
                         Revolutionizing <br />
@@ -19,7 +19,7 @@ const About = () => {
                         </span> in Mudug
                     </h1>
                     <p className="text-lg text-gray-600 leading-relaxed">
-                        Galkacyo Digital Market is the region's premier online platform designed to bridge the gap between local sellers and buyers.
+                        Suuqify is the region's premier online platform designed to bridge the gap between local sellers and buyers.
                         We empower small businesses by providing them with a digital storefront while offering customers a seamless shopping experience
                         from the comfort of their homes.
                     </p>
@@ -36,9 +36,9 @@ const About = () => {
                     <div className="absolute inset-0 bg-gradient-to-tr from-primary-600/20 to-secondary-500/20 rounded-3xl transform rotate-3"></div>
                     <img
                         src="/community-marketplace.jpg"
-                        alt="Galkacyo Digital Market Community"
+                        alt="Suuqify Community"
                         className="relative rounded-3xl shadow-xl w-full object-cover h-80 md:h-[500px]"
-                        onError={(e) => { e.target.src = 'https://via.placeholder.com/600x400?text=Galkacyo+Marketplace'; }}
+                        onError={(e) => { e.target.src = 'https://via.placeholder.com/600x400?text=Suuqify'; }}
                     />
                 </div>
             </section>

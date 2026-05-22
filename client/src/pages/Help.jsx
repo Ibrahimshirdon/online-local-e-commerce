@@ -15,7 +15,7 @@ const Help = () => {
                     How can we <span className="text-primary-600">help you?</span>
                 </h1>
                 <p className="text-lg text-gray-600">
-                    Welcome to the Galkacyo Digital Market guide. Whether you want to buy amazing products or start your own shop, we've got you covered.
+                    Welcome to the Suuqify guide. Whether you want to buy amazing products or start your own shop, we've got you covered.
                 </p>
             </div>
 
@@ -41,7 +41,7 @@ const Help = () => {
             <div className="max-w-4xl mx-auto">
                 {activeTab === 'buyer' ? (
                     <div className="space-y-8 animate-fadeIn">
-                        <h2 className="text-2xl font-bold text-center mb-8">How to Buy on Galkacyo Market</h2>
+                        <h2 className="text-2xl font-bold text-center mb-8">How to Buy on Suuqify</h2>
 
                         <div className="grid md:grid-cols-2 gap-6">
                             <StepCard
@@ -76,7 +76,7 @@ const Help = () => {
                     </div>
                 ) : (
                     <div className="space-y-8 animate-fadeIn">
-                        <h2 className="text-2xl font-bold text-center mb-8">How to Sell on Galkacyo Market</h2>
+                        <h2 className="text-2xl font-bold text-center mb-8">How to Sell on Suuqify</h2>
 
                         <div className="grid md:grid-cols-2 gap-6">
                             <StepCard

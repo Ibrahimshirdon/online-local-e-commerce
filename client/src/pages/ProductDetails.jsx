@@ -52,7 +52,7 @@ const ProductDetails = () => {
     if (loading) return <div className="text-center mt-10">Loading...</div>;
     if (!product) return <div className="text-center mt-10">Product not found</div>;
 
-    const whatsappLink = `https://wa.me/${product.shop_id?.phone}?text=Asc, I want this product: ${product.name} from Galkacyo Market`;
+    const whatsappLink = `https://wa.me/${product.shop_id?.phone}?text=Asc, I want this product: ${product.name} from Suuqify`;
 
     // Get all images (from images array or fallback to image_url)
     const allImages = product.images && product.images.length > 0

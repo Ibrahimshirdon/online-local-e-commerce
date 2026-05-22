@@ -90,9 +90,9 @@ const Navbar = () => {
                         className={`text-2xl font-extrabold transition-all duration-300 flex items-center gap-3 hover:scale-105 ${scrolled ? 'text-primary-600' : 'text-white drop-shadow-lg'
                             }`}
                     >
-                        <img src="/logo.png" alt="Galkacyo Market" className="h-12 w-auto drop-shadow-md" />
-                        <span className="hidden sm:inline font-black tracking-tight">Galkacyo Market</span>
-                        <span className="sm:hidden font-black">GM</span>
+                        <img src="/logo.png" alt="Suuqify" className="h-12 w-auto drop-shadow-md" />
+                        <span className="hidden sm:inline font-black tracking-tight">Suuqify</span>
+                        <span className="sm:hidden font-black">SQ</span>
                     </Link>
 
                     {/* Navigation Links */}
@@ -384,7 +384,7 @@ const Navbar = () => {
                                         Login
                                     </Link>
                                     <Link to="/register" onClick={() => setShowMobileMenu(false)} className="flex justify-center items-center gap-2 px-4 py-3 mx-2 bg-gray-50 text-gray-700 rounded-xl font-bold hover:bg-gray-100">
-                                        <FaStore /> Sell on Galkacyo
+                                        <FaStore /> Sell on Suuqify
                                     </Link>
                                 </>
                             )}
