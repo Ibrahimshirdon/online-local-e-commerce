@@ -40,7 +40,7 @@ const ProductCard = ({ product }) => {
             <div className="group relative bg-white/80 backdrop-blur-xl rounded-3xl shadow-soft overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border border-white/40 hover:border-primary-300">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none z-0"></div>
                 {/* Product Image */}
-                <div className="relative h-44 overflow-hidden bg-gray-100 z-10">
+                <div className="relative h-44 overflow-hidden bg-white z-10 flex items-center justify-center p-2">
                     <img
                         src={
                             product.images && product.images.length > 0
@@ -50,7 +50,7 @@ const ProductCard = ({ product }) => {
                                     : 'https://via.placeholder.com/400x300?text=No+Image'
                         }
                         alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-700"
                     />
 
                     {/* Image Count Indicator */}
