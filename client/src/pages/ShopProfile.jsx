@@ -4,6 +4,7 @@ import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import AuthContext from '../context/AuthContext';
 import { FaFlag } from 'react-icons/fa';
+import ProductCard from '../components/ProductCard';
 
 const ShopProfile = () => {
     const { id } = useParams();
@@ -77,40 +78,44 @@ const ShopProfile = () => {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Shop Header / Banner */}
-            <div className="bg-white shadow-sm border-b border-gray-200">
-                <div className="container mx-auto px-4 py-8">
-                    <div className="flex flex-col md:flex-row items-center gap-6">
-                        <div className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-gray-100 flex-shrink-0">
-                            <img
-                                src={shop.logo_url ? (shop.logo_url.startsWith('http') ? shop.logo_url : `${shop.logo_url}`) : 'https://via.placeholder.com/150?text=Shop+Logo'}
-                                alt={shop.name}
-                                className="w-full h-full object-cover"
-                            />
-                        </div>
-                        <div className="text-center md:text-left flex-1">
-                            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">{shop.name}</h1>
-                            <p className="text-gray-600 max-w-2xl mb-4">{shop.description}</p>
-                            <div className="flex flex-wrap justify-center md:justify-start gap-4 text-sm text-gray-500">
-                                <span className="flex items-center gap-1">
-                                    📍 {shop.location}
+            {/* Cover Banner */}
+            <div className="h-48 md:h-72 w-full bg-gradient-to-r from-primary-600 via-teal-500 to-secondary-600 relative overflow-hidden">
+                <div className="absolute inset-0 bg-white/10 opacity-20"></div>
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+            </div>
+
+            {/* Profile Header Card */}
+            <div className="container mx-auto px-4 relative z-10 -mt-24 mb-8">
+                <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-xl p-6 md:p-10 border border-white flex flex-col md:flex-row items-center md:items-end gap-6 relative">
+                    <div className="w-32 h-32 md:w-44 md:h-44 rounded-full overflow-hidden border-8 border-white shadow-2xl bg-gray-100 flex-shrink-0 absolute -top-16 md:-top-24 left-1/2 md:left-10 transform -translate-x-1/2 md:-translate-x-0">
+                        <img
+                            src={shop.logo_url ? (shop.logo_url.startsWith('http') ? shop.logo_url : `${shop.logo_url}`) : 'https://via.placeholder.com/150?text=Shop+Logo'}
+                            alt={shop.name}
+                            className="w-full h-full object-cover"
+                        />
+                    </div>
+                    <div className="w-full h-16 md:h-0 hidden md:block"></div> {/* Spacer for absolute logo */}
+                    <div className="text-center md:text-left flex-1 pt-16 md:pt-0 md:ml-[180px]">
+                        <h1 className="text-3xl md:text-5xl font-black text-gray-900 mb-3 drop-shadow-sm">{shop.name}</h1>
+                        <div className="flex flex-wrap justify-center md:justify-start gap-3 text-sm font-bold text-gray-600">
+                            <span className="flex items-center gap-1.5 bg-gray-100 px-4 py-2 rounded-full shadow-inner">
+                                📍 {shop.location}
+                            </span>
+                            <span className="flex items-center gap-1.5 bg-gray-100 px-4 py-2 rounded-full shadow-inner">
+                                📞 {shop.phone}
+                            </span>
+                            {shop.license && (
+                                <span className="flex items-center gap-1.5 bg-gray-100 px-4 py-2 rounded-full shadow-inner">
+                                    📜 Lic: {shop.license}
                                 </span>
-                                <span className="flex items-center gap-1">
-                                    📞 {shop.phone}
-                                </span>
-                                {shop.license && (
-                                    <span className="flex items-center gap-1">
-                                        📜 Lic: {shop.license}
-                                    </span>
-                                )}
-                            </div>
+                            )}
                         </div>
                     </div>
-                    <div className="flex flex-col items-center md:items-end gap-2">
+                    <div className="flex flex-col items-center md:items-end gap-2 mt-4 md:mt-0">
                         {user && user.id !== shop.owner_id && (
                             <button
                                 onClick={() => setShowReportModal(true)}
-                                className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium border border-red-200"
+                                className="flex items-center gap-2 px-5 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors text-sm font-bold border border-red-100 hover:shadow-md"
                             >
                                 <FaFlag /> Report Shop
                             </button>
@@ -213,71 +218,47 @@ const ShopProfile = () => {
                 )
             }
 
-            {/* Shop Content */}
-            <div className="container mx-auto px-4 py-8">
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800">Products</h2>
-                    <span className="text-gray-500">{products.length} Items</span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {products.map((product) => (
-                        <div key={product.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow group">
-                            <div className="relative h-48 overflow-hidden">
-                                <img
-                                    src={
-                                        product.images && product.images.length > 0
-                                            ? (product.images[0].image_url.startsWith('http') ? product.images[0].image_url : `${product.images[0].image_url}`)
-                                            : product.first_image
-                                                ? (product.first_image.startsWith('http') ? product.first_image : `${product.first_image}`)
-                                                : product.image_url
-                                                    ? (product.image_url.startsWith('http') ? product.image_url : `${product.image_url}`)
-                                                    : 'https://via.placeholder.com/300'
-                                    }
-                                    alt={product.name}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                />
-                                {product.is_black_friday && (
-                                    <div className="absolute top-2 left-2 bg-black text-white text-xs font-bold px-2 py-1 rounded uppercase tracking-wide">
-                                        Black Friday
-                                    </div>
-                                )}
-                                {product.discount_price && Number(product.discount_price) > 0 && (
-                                    <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
-                                        SALE
-                                    </div>
-                                )}
-                            </div>
-                            <div className="p-4">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-1 truncate">{product.name}</h3>
-                                <p className="text-sm text-gray-500 mb-3">{product.brand} • {product.model}</p>
-                                <div className="flex justify-between items-end">
-                                    <div>
-                                        {product.discount_price && Number(product.discount_price) > 0 ? (
-                                            <div className="flex flex-col">
-                                                <span className="text-gray-400 text-sm line-through">${product.price}</span>
-                                                <span className="text-xl font-bold text-red-600">${product.discount_price}</span>
-                                            </div>
-                                        ) : (
-                                            <span className="text-xl font-bold text-primary-600">${product.price}</span>
-                                        )}
-                                    </div>
-                                    <a href={`/product/${product.id}`} className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors">
-                                        View
-                                    </a>
-                                </div>
-                            </div>
+            {/* Shop Content (About & Products) */}
+            <div className="container mx-auto px-4 pb-16">
+                <div className="flex flex-col lg:flex-row gap-8">
+                    {/* About Section - Left Column */}
+                    <div className="lg:w-1/3">
+                        <div className="bg-white rounded-3xl shadow-soft p-8 border border-gray-100 sticky top-24">
+                            <h2 className="text-2xl font-black text-gray-800 mb-6 flex items-center gap-3">
+                                <span className="w-8 h-1.5 bg-primary-500 rounded-full"></span> About Shop
+                            </h2>
+                            <p className="text-gray-600 leading-relaxed font-medium">
+                                {shop.description || "Welcome to our shop! We are excited to offer you the best products and deals. Browse around and feel free to reach out."}
+                            </p>
                         </div>
-                    ))}
-                </div>
-
-                {products.length === 0 && (
-                    <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
-                        <p className="text-gray-500 text-lg">No products available in this shop yet.</p>
                     </div>
-                )}
+
+                    {/* Products Section - Right Column */}
+                    <div className="lg:w-2/3">
+                        <div className="flex justify-between items-center mb-8">
+                            <h2 className="text-3xl font-black text-gray-800">Products</h2>
+                            <span className="bg-gradient-to-r from-primary-100 to-secondary-100 text-primary-800 font-bold px-5 py-2 rounded-full text-sm shadow-sm">{products.length} Items</span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            {products.map((product, index) => (
+                                <div key={product.id} className="animate-fadeInScale" style={{ animationDelay: `${index * 0.08}s`, animationFillMode: 'both' }}>
+                                    <ProductCard product={product} />
+                                </div>
+                            ))}
+                        </div>
+
+                        {products.length === 0 && (
+                            <div className="text-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm mt-4">
+                                <div className="text-6xl mb-4 animate-bounce">🛍️</div>
+                                <h3 className="text-2xl font-bold text-gray-800 mb-2">No Products Yet</h3>
+                                <p className="text-gray-500 text-lg">Check back later for exciting items from {shop.name}!</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
-        </div >
+        </div>
     );
 };
 
